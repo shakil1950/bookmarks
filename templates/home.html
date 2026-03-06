@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+        Bookmark your favorite images.
+    </h1>
+    <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Share images from any website and follow people to see what they are sharing.
+    </p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {% for i in "1234" %}
+    <div class="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+        <div class="aspect-square bg-gray-200 overflow-hidden">
+            <img src="https://picsum.photos/400/400?random={{ i }}" alt="Random Image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        </div>
+        <div class="p-4">
+            <h3 class="font-semibold text-gray-800">Beautiful Bookmark {{ i }}</h3>
+            <p class="text-xs text-gray-500 mt-1">Shared by @User</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

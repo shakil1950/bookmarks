@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Bookmarks{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white/40 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-white/50 relative overflow-hidden">
+        
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/50 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-200/50 rounded-full blur-3xl"></div>
+
+        <div class="relative">
+            <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tight">
+                Welcome Back
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-500">
+                Please enter your details to sign in
+            </p>
+        </div>
+
+        <form class="mt-8 space-y-6" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="rounded-md space-y-4">
+                <div>
+                    <label for="id_username" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Username</label>
+                    <input id="id_username" name="username" type="text" required 
+                        class="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm bg-white/50" 
+                        placeholder="Your username">
+                </div>
+                <div>
+                    <label for="id_password" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Password</label>
+                    <input id="id_password" name="password" type="password" required 
+                        class="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm bg-white/50" 
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="text-sm">
+                    <a href="#" class="font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
+                        Forgot your password?
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" 
+                    class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-black rounded-xl text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-xl shadow-indigo-200 transition-all active:scale-95">
+                    Sign in
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-8">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-transparent text-gray-400 font-medium uppercase tracking-tighter">Or continue with</span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <a href="#" class="w-full inline-flex justify-center py-3 px-4 rounded-xl shadow-sm bg-white border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
+                    <img class="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/355037/google.svg" alt="Google Logo">
+                    Google
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
