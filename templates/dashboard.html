@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-white rounded-2xl shadow-sm p-8 mb-8 border border-gray-100 flex flex-col md:flex-row justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900">Welcome, {{ request.user.first_name|default:request.user.username }}! 🚀</h1>
+            <p class="text-gray-500 mt-2">Manage your bookmarked images and discover new inspirations.</p>
+        </div>
+        
+        <div class="mt-6 md:mt-0 text-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+            <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Install Bookmarklet</p>
+            <a href="javascript:{% include 'image/bookmarklet_launcher.js' %}" 
+               class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all transform hover:scale-105 cursor-move">
+                🔖bookmark
+            </a>
+            <p class="text-[10px] text-indigo-400 mt-2">Drag this to your bookmarks bar</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-sm text-gray-500 font-medium">Total Images</p>
+            <p class="text-3xl font-bold text-gray-900">{{images.count}}</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-sm text-gray-500 font-medium">Liked Images</p>
+            <p class="text-3xl font-bold text-gray-900">{{ request.user.images_liked.count }}</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p class="text-sm text-gray-500 font-medium">Last Activity</p>
+            <p class="text-lg font-semibold text-gray-700">{{ request.user.last_login|timesince }} ago</p>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Your Bookmarks</h2>
+        <a href="{% url "list_image" %}" class="text-indigo-600 font-semibold hover:text-indigo-800 transition flex items-center gap-1">
+        View all 
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+    </a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {% for image in images|slice:":8" %}
+        <div class="group relative bg-gray-200 rounded-xl overflow-hidden aspect-square shadow-md">
+            <img src="{{ image.image.url }}" alt="{{ image.title }}" class="object-cover w-full h-full group-hover:scale-110 transition duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <p class="text-white text-sm font-medium truncate">{{ image.title }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+            <p class="text-gray-400 text-lg font-medium">No images bookmarked yet. Start by using the Bookmarklet!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

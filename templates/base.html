@@ -1,15 +1,44 @@
+{% load static %}
+{% load socialaccount %}
 <!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>{% block title %}  |{% endblock title %} Bookmarks</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/sweetalert.js' %}"></script>
+    <title>{% block title %} Home {% endblock title %} | Bookmarks</title>
   </head>
   <body>
     {% include "nav.html" %}
     {% block content %}
     
     {% endblock content %}
+
+    <script>
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
+                title: "{% if message.tags == 'error' %}Oh!{% else %}Congratulations!{% endif %}",
+                text: "{{ message }}",
+                confirmButtonText: 'OK',
+                timer: 3000, // ৩ সেকেন্ড পর অটো চলে যাবে
+                timerProgressBar: true
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+
+<script>
+  const btn = document.getElementById('mobile-menu-button');
+const menu = document.getElementById('mobile-menu');
+
+btn.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+    // আপনি চাইলে এখানে আরও এনিমেশন লজিক যোগ করতে পারেন
+});
+</script>
   </body>
 </html>

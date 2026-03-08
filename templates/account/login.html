@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-
-{% block title %}Login | Bookmarks{% endblock %}
+{% load socialaccount %}
+{% block title %}Login {% endblock %}
 
 {% block content %}
 <div class="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -22,7 +22,7 @@
             {% csrf_token %}
             <div class="rounded-md space-y-4">
                 <div>
-                    <label for="id_username" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Username</label>
+                    <label for="id_username" class="block text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Username or Email</label>
                     <input id="id_username" name="username" type="text" required 
                         class="appearance-none relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all sm:text-sm bg-white/50" 
                         placeholder="Your username">
@@ -37,7 +37,7 @@
 
             <div class="flex items-center justify-between">
                 <div class="text-sm">
-                    <a href="#" class="font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
+                    <a href="{% url "password-reset" %}" class="font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
                         Forgot your password?
                     </a>
                 </div>
@@ -62,9 +62,11 @@
             </div>
 
             <div class="mt-6">
-                <a href="#" class="w-full inline-flex justify-center py-3 px-4 rounded-xl shadow-sm bg-white border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all">
-                    <img class="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/355037/google.svg" alt="Google Logo">
-                    Google
+                
+
+                <a href="{% provider_login_url 'google' %}" class="flex items-center justify-center gap-3 w-full py-4 bg-white border border-gray-200 rounded-2xl font-bold shadow-sm hover:bg-gray-50 transition-all">
+                    <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5">
+                    Continue with Google
                 </a>
             </div>
         </div>

@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+SITE_ID = 1
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,12 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'crispy_forms',
     'crispy_tailwind',
-    'account',
-    'home'
-   
-    
+    'account.apps.AccountConfig',
+    'home',
+    'images',
+
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
 
@@ -56,10 +60,35 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'bookmarks.urls'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend', 
+    'account.authentication.EmailOrUsernameModelBackend', 
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+
+
+
+# আগের লাইনটি পরিবর্তন করে আপনার অ্যাপের পাথ দিন
+SOCIALACCOUNT_ADAPTER = 'account.adapter.MySocialAccountAdapter'
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_LOGIN_ON_GET = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -130,14 +159,14 @@ MEDIA_URL='/media/'
 MEDIA_ROOT=BASE_DIR/'media'
 
 LOGIN_URL = 'login'
-# LOGIN_REDIRECT_URL = 'home'
-# LOGOUT_REDIRECT_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = '' 
-# EMAIL_HOST_PASSWORD = ''
-# # settings.py
-# DEFAULT_FROM_EMAIL = 'Bookmarks<shakilahmed.pbl@gmail.com>'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'shakilahmed.pbl@gmail.com' 
+EMAIL_HOST_PASSWORD = 'odhzphwwpyupwobd'
+# settings.py
+DEFAULT_FROM_EMAIL = 'Bookmarks<shakilahmed.pbl@gmail.com>'

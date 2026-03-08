@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="min-h-screen bg-white py-10 px-4">
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="relative bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden mb-8">
+            <div class="h-32 md:h-40 bg-[#3b82f6]"></div>
+            
+            <div class="px-6 md:px-10 pb-8">
+                <div class="relative flex flex-col md:flex-row items-center md:items-end -mt-16 md:-mt-20 gap-6">
+                    <div class="relative">
+                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                            {% if user.socialaccount_set.all.0.get_avatar_url %}
+                                <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" class="w-full h-full object-cover">
+                            {% elif user.profile.avater %}
+                                <img src="{{ user.profile.avater.url }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=6366f1&color=fff" class="w-full h-full">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left pb-2">
+                        <h1 class="text-3xl font-black text-gray-900 leading-tight">
+                            {{ user.first_name|default:user.username }} {{ user.last_name }}
+                        </h1>
+                        <p class="text-gray-500 font-medium">@{{ user.username }} • Joined {{ user.date_joined|date:"M Y" }}</p>
+                    </div>
+
+                    <div class="pb-2">
+                        <button class="bg-[#4f46e5] text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:scale-105 transition-all active:scale-95">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <div class="lg:w-80 w-full space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Account Stats</h3>
+                    <div class="space-y-5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 font-bold">Bookmarks</span>
+                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black text-xs">124</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 font-bold">Followers</span>
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-black text-xs">850</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Account settings</h3>
+                    <div class="space-y-5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 font-bold">Change Password</span>
+                            <a href='#'><span class=" text-indigo-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-regular fa-pen-to-square"></i></span></a>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600 font-bold">Logout</span>
+                            <a href=""><span class=" text-blue-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-solid fa-right-from-bracket"></i></span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <div class="bg-white p-8 md:p-10 rounded-[2rem] border border-gray-100 shadow-sm">
+                    <div class="mb-10">
+                        <h2 class="text-2xl font-black text-gray-900">Personal Information</h2>
+                        <p class="text-gray-400 text-sm font-medium mt-1">Manage your account details and preferences.</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Username</label>
+                                {{ u_form.username }}
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">First Name</label>
+                                {{ u_form.first_name }}
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Last Name</label>
+                                {{ u_form.last_name }}
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Email Address</label>
+                                {{ u_form.email }}
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100 my-6">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Date of Birth</label>
+                                {{ p_form.dob }}
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Mobile Number</label>
+                                {{ p_form.mob }}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" >
+                                <div class="space-y-1 mt-6">
+                                    <label class="text-sm font-bold text-gray-700 ml-1">Profile Picture</label>
+                                    <div class="p-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                        {{ p_form.avater }}
+                                    </div>
+                                </div>
+                                <div class="space-y-1">
+                                <label class="text-sm font-bold text-gray-700 ml-1">Gender</label>
+                                {{ p_form.gender }}
+                                </div>
+                        </div>
+                        
+
+                        <button type="submit" class="w-full md:w-max px-10 py-4 bg-[#1e293b] text-white font-bold rounded-2xl shadow-lg hover:bg-black-700 transition-all">
+                            Save  Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Crispy forms styling to match your image */
+    .form-group label {
+        font-weight: 800 !important;
+        color: #111827 !important;
+        font-size: 13px !important;
+        margin-bottom: 8px !important;
+        display: block;
+    }
+    input[type="text"], input[type="email"], input[type="file"], select {
+        background-color: #f9fafb !important;
+        border: 1px solid #f3f4f6 !important;
+        border-radius: 14px !important;
+        padding: 12px 16px !important;
+        font-weight: 500 !important;
+        color: #374151 !important;
+    }
+    input:focus {
+        background-color: #fff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+        outline: none !important;
+    }
+
+    /* ১. হেল্প টেক্সট এবং কারেন্ট ফাইল লিঙ্ক হাইড করা */
+    .invalid-feedback, .help-block, .form-text, .text-muted {
+        display: none !important;
+    }
+    
+    /* ২. 'Currently' এবং 'Change' লেখাগুলো হাইড করা (ফাইল ইনপুট ক্লিন রাখা) */
+    input[type="file"] {
+        color: transparent;
+    }
+    
+    .asteriskField {
+        display: none; /* লাল স্টার চিহ্ন সরিয়ে ফেলা */
+    }
+
+    /* ৩. ইনপুট ফিল্ডের ডিজাইন আপনার ছবির মতো করা */
+    input[type="text"], input[type="email"] {
+        background-color: #f8fafc !important; /* হালকা গ্রে ব্যাকগ্রাউন্ড */
+        border: 1px solid #f1f5f9 !important;
+        border-radius: 12px !important;
+        padding: 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease;
+    }
+
+    input:focus {
+        background-color: #ffffff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05) !important;
+    }
+
+    label {
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        margin-bottom: 8px !important;
+        font-size: 14px !important;
+    }
+</style>
+{% endblock %}

@@ -1,47 +1,110 @@
-<nav class="bg-white/70 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 transition-all duration-300 shadow-sm">
+<nav class="bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50 transition-all duration-300" x-data="{ mobileMenuOpen: false }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
+        <div class="flex justify-between h-20 items-center">
             
-            <div class="flex items-center gap-10">
-                <a href="/" class="group flex items-center gap-2">
-                    <div class="bg-gradient-to-tr from-indigo-600 to-purple-500 p-2 rounded-lg shadow-lg shadow-indigo-200 group-hover:rotate-12 transition-transform">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-                        </svg>
+            <div class="flex items-center gap-12">
+                <a href="/" class="group flex items-center gap-2.5">
+                    <div class="relative">
+                        <div class="absolute -inset-1 bg-gradient-to-tr from-indigo-600 to-purple-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
+                        <div class="relative bg-gradient-to-tr from-indigo-600 to-purple-500 p-2.5 rounded-xl shadow-xl transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                            </svg>
+                        </div>
                     </div>
-                    <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                    <span class="text-2xl font-black tracking-tighter bg-gradient-to-r from-gray-900 via-indigo-900 to-gray-900 bg-clip-text text-transparent">
                         Bookmarks
                     </span>
                 </a>
 
-                <div class="hidden md:flex items-center space-x-1">
-                    <a href="#" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">Dashboard</a>
-                    <a href="#" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">Images</a>
-                    <a href="#" class="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all">People</a>
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="{% url 'dashboard' %}" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
+                        Dashboard
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
+                    </a>
+                    <a href="{% url 'image_create' %}" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
+                        Images
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
+                    </a>
+                    <a href="#" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
+                        People
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
+                    </a>
                 </div>
             </div>
 
             <div class="flex items-center gap-5">
-                <button class="p-2 text-gray-400 hover:text-indigo-600 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </button>
-
                 {% if request.user.is_authenticated %}
-                    <div class="flex items-center gap-4 border-l pl-5 border-gray-100">
-                        <div class="hidden sm:block text-right">
-                            <p class="text-xs font-bold text-gray-900">{{ request.user.username }}</p>
-                            <a href="" class="text-[10px] uppercase tracking-wider font-bold text-red-400 hover:text-red-600 transition">Logout</a>
-                        </div>
-                        <div class="w-10 h-10 rounded-full ring-2 ring-indigo-100 p-0.5 hover:ring-indigo-500 transition-all cursor-pointer">
-                            <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="rounded-full shadow-inner">
+                    <div class="hidden md:flex items-center gap-4 bg-gray-50/50 p-1.5 pr-5 rounded-full border border-gray-100 hover:border-indigo-100 transition-all">
+                        <a href="{% url 'profile_view' %}" class="relative group">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full opacity-20 group-hover:opacity-100 transition duration-300 blur-[2px]"></div>
+                            <div class="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                {% if user.socialaccount_set.all.0.get_avatar_url %}
+                                    <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" class="w-full h-full object-cover">
+                                {% elif request.user.profile.avater %}
+                                    <img src="{{ request.user.profile.avater.url }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
+                                {% endif %}
+                            </div>
+                        </a>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-black text-gray-900 leading-none mb-1 lowercase">@{{ request.user.username }}</span>
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="text-[9px] uppercase tracking-[0.1em] font-black text-red-400 hover:text-red-600 transition flex items-center gap-1">
+                                    Logout <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7"></path></svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% else %}
-                    <div class="flex items-center gap-2">
-                        <a href="{% url "login" %}" class="px-5 py-2 text-sm font-bold text-gray-600 hover:text-indigo-600 transition">Log in</a>
-                        <a href="#" class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:shadow-xl hover:shadow-indigo-200 transition-all active:scale-95">
+                    <div class="hidden md:flex items-center gap-3">
+                        <a href="{% url 'login' %}" class="px-6 py-2.5 text-sm font-bold text-gray-600 hover:text-indigo-600 transition">Log in</a>
+                        <a href="{% url 'registration' %}" class="bg-gray-900 text-white px-7 py-3 rounded-2xl text-sm font-bold hover:bg-indigo-600 hover:shadow-xl hover:shadow-indigo-200 transition-all transform active:scale-95">
                             Join Now
                         </a>
+                    </div>
+                {% endif %}
+
+                <button id="mobile-menu-button" class="md:hidden p-3 rounded-2xl bg-gray-50 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-transparent hover:border-indigo-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="menu-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-white/95 backdrop-blur-xl border-b border-gray-100">
+        <div class="px-6 pt-4 pb-8 space-y-3">
+            <a href="{% url 'dashboard' %}" class="block px-4 py-4 text-base font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition">Dashboard</a>
+            <a href="{% url 'image_create' %}" class="block px-4 py-4 text-base font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-6:00 rounded-2xl transition">Images</a>
+            <a href="#" class="block px-4 py-4 text-base font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-2xl transition">People</a>
+            
+            <div class="pt-4 mt-4 border-t border-gray-50">
+                {% if request.user.is_authenticated %}
+                    <div class="bg-indigo-50/50 p-4 rounded-3xl border border-indigo-100 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full overflow-hidden ring-4 ring-white shadow-sm">
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <p class="text-sm font-black text-gray-900 leading-none">{{ request.user.username }}</p>
+                                <a href="{% url 'profile_view' %}" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest">My Profile</a>
+                            </div>
+                        </div>
+                        <form action="{% url 'logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="p-3 bg-white text-red-500 rounded-2xl shadow-sm hover:bg-red-500 hover:text-white transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="{% url 'login' %}" class="text-center py-4 font-bold text-gray-600 bg-gray-50 rounded-2xl">Log in</a>
+                        <a href="{% url 'registration' %}" class="text-center py-4 font-bold bg-indigo-600 text-white rounded-2xl shadow-lg">Join</a>
                     </div>
                 {% endif %}
             </div>

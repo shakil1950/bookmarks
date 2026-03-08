@@ -23,7 +23,10 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home,name='home'),
-    path('account',include('account.urls')),
+    path('dashboard/',views.dashboard,name='dashboard'),
+    path('account/',include('account.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('image/', include('images.urls')),
 ]
 
 if settings.DEBUG:
