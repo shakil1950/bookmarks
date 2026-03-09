@@ -13,7 +13,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import UserUpdateForm,ProfileUpdateForm
-
+from images.models import Image
 
 
 def login(request):

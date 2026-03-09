@@ -6,7 +6,10 @@ from django.shortcuts import redirect, render
 from .forms import ImageCreateForm
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
-from .models import Image
+from .models import Image,Comment
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def image_create(request):
@@ -63,3 +66,39 @@ def image_detail(request, id, slug):
         'image': image,
         'back_url':back_url
     })
+
+@login_required
+@require_POST
+def image_like(request):
+    image_id = request.POST.get('id')
+    action = request.POST.get('action')
+    if image_id and action:
+        try:
+            image = Image.objects.get(id=image_id)
+            if action == 'like':
+                image.users_like.add(request.user)
+            else:
+                image.users_like.remove(request.user)
+            return JsonResponse({'status': 'ok'})
+        except Image.DoesNotExist:
+            pass
+    return JsonResponse({'status': 'error'})
+
+@login_required
+@require_POST
+def image_comment(request):
+    image_id = request.POST.get('id')
+    body = request.POST.get('body')
+    if image_id and body:
+        try:
+            image = Image.objects.get(id=image_id)
+            comment = Comment.objects.create(image=image, user=request.user, body=body)
+            return JsonResponse({
+                'status': 'ok',
+                'user': request.user.username,
+                'body': comment.body,
+                'created': 'Just now'
+            })
+        except Image.DoesNotExist:
+            return JsonResponse({'status': 'error'})
+    return JsonResponse({'status': 'error'})

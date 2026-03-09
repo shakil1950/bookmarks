@@ -1,44 +1,148 @@
 {% load static %}
-{% load socialaccount %}
 <!doctype html>
-<html>
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %} Bookmarks {% endblock %}</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="{% static 'js/sweetalert.js' %}"></script>
-    <title>{% block title %} Home {% endblock title %} | Bookmarks</title>
-  </head>
-  <body>
-    {% include "nav.html" %}
-    {% block content %}
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     
-    {% endblock content %}
-
     <script>
+        const csrftoken = Cookies.get('csrftoken');
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // ১. লাইক লজিক (Login Check সহ)
+            document.addEventListener('click', function(e) {
+                const likeButton = e.target.closest('a.like');
+                if (likeButton) {
+                    e.preventDefault();
+
+                    // ইউজার লগইন করা আছে কি না চেক (Django Template variable ব্যবহার করে)
+                    const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+
+                    if (!isAuthenticated) {
+                        // লগইন না থাকলে Pexels এর মতো Popup দেখাবে
+                        Swal.fire({
+                            title: '<span class="text-2xl font-black">Join Bookmarks</span>',
+                            html: `
+                                <div class="text-left mt-4">
+                                    <p class="text-gray-500 mb-6 text-center">Save your favorite photos and connect with creators.</p>
+                                    <div class="space-y-3">
+                                        <a href="{% url 'login' %}" class="w-full flex items-center justify-center py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition">
+                                            Login with Gmail
+                                        </a>
+                                        <div class="relative py-2 text-center">
+                                            <span class="bg-white px-2 text-xs text-gray-400 uppercase tracking-widest relative z-10">Or</span>
+                                            <hr class="absolute top-1/2 w-full border-gray-100">
+                                        </div>
+                                        <a href="{% url 'registration' %}" class="w-full flex items-center justify-center py-3 border-2 border-gray-100 rounded-xl font-bold hover:bg-gray-50 transition">
+                                            Create an account
+                                        </a>
+                                    </div>
+                                    <p class="text-center mt-6 text-xs text-gray-400">
+                                        By joining, you agree to our Terms and Privacy Policy.
+                                    </p>
+                                </div>
+                            `,
+                            showConfirmButton: false,
+                            showCloseButton: true,
+                            customClass: {
+                                popup: 'rounded-[2.5rem] p-10',
+                                closeButton: 'border-none focus:outline-none'
+                            }
+                        });
+                        return; // সার্ভারে রিকোয়েস্ট পাঠাবে না
+                    }
+
+                    // লগইন থাকলে আগের মতো লাইক কাজ করবে
+                    const url = '{% url "like" %}';
+                    var formData = new FormData();
+                    formData.append('id', likeButton.dataset.id);
+                    formData.append('action', likeButton.dataset.action);
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrftoken},
+                        body: formData,
+                        mode: 'same-origin'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data['status'] === 'ok') {
+                            var previousAction = likeButton.dataset.action;
+                            var action = previousAction === 'like' ? 'unlike' : 'like';
+                            likeButton.dataset.action = action;
+                            var icon = likeButton.querySelector('svg');
+                            
+                            if (action === 'unlike') {
+                                icon.classList.add('text-red-500');
+                                likeButton.classList.add('bg-white');
+                            } else {
+                                icon.classList.remove('text-red-500');
+                                likeButton.classList.remove('bg-white');
+                            }
+
+                            var countSpan = likeButton.closest('.group').querySelector('span.total');
+                            if (countSpan) {
+                                var totalLikes = parseInt(countSpan.innerHTML);
+                                countSpan.innerHTML = previousAction === 'like' ? totalLikes + 1 : totalLikes - 1;
+                            }
+                        }
+                    });
+                }
+            });
+
+            // ২. Infinite Scroll লজিক (আগের মতোই থাকবে)
+            let page = 1;
+            let emptyPage = false;
+            let blockRequest = false;
+
+            window.addEventListener('scroll', function() {
+                let margin = document.body.clientHeight - window.innerHeight - 200;
+                if (window.pageYOffset > margin && !emptyPage && !blockRequest) {
+                    blockRequest = true;
+                    page += 1;
+                    fetch('?images_only=1&page=' + page)
+                    .then(response => response.text())
+                    .then(html => {
+                        if (html.trim() === '') {
+                            emptyPage = true;
+                        } else {
+                            let imageList = document.getElementById('image-list');
+                            if (imageList) {
+                                imageList.insertAdjacentHTML('beforeEnd', html);
+                                blockRequest = false;
+                            }
+                        }
+                    });
+                }
+            });
+
+            {% block domready %}{% endblock %}
+        });
+    </script>
+</head>
+<body class="bg-gray-50">
+    {% include "nav.html" %}
+    
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+
     {% if messages %}
+    <script>
         {% for message in messages %}
             Swal.fire({
                 icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
-                title: "{% if message.tags == 'error' %}Oh!{% else %}Congratulations!{% endif %}",
-                text: "{{ message }}",
-                confirmButtonText: 'OK',
-                timer: 3000, // ৩ সেকেন্ড পর অটো চলে যাবে
-                timerProgressBar: true
+                title: "{{ message }}",
+                timer: 3000
             });
         {% endfor %}
+    </script>
     {% endif %}
-</script>
-
-<script>
-  const btn = document.getElementById('mobile-menu-button');
-const menu = document.getElementById('mobile-menu');
-
-btn.addEventListener('click', () => {
-    menu.classList.toggle('hidden');
-    // আপনি চাইলে এখানে আরও এনিমেশন লজিক যোগ করতে পারেন
-});
-</script>
-  </body>
+</body>
 </html>
