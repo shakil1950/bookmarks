@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+
+{% block title %}Explore People{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12">
+
+    <div class="relative bg-white rounded-[3.5rem] py-16 mb-20 overflow-hidden border border-gray-100 shadow-[0_30px_60px_rgba(0,0,0,0.05)]">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-indigo-50 rounded-full blur-[100px] opacity-70"></div>
+        <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-50 rounded-full blur-[100px] opacity-70"></div>
+
+        <div class="relative z-10">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-black text-gray-900 tracking-tight">Top <span class="text-indigo-600">Creators</span></h2>
+                <div class="h-1.5 w-12 bg-indigo-600 mx-auto mt-2 rounded-full"></div>
+            </div>
+
+            <div class="flex overflow-hidden group">
+                <div class="flex gap-10 animate-horizontal-scroll hover:pause py-4">
+                    {% for creator in top_creators %}
+                    <a href="{{ creator.get_absolute_url }}" class="flex flex-col items-center gap-4 min-w-[200px] group/item transition-all duration-500">
+                        <div class="relative">
+                            <div class="absolute inset-0 bg-indigo-500 rounded-[2.5rem] blur-xl opacity-0 group-hover/item:opacity-30 transition-opacity duration-500"></div>
+                            <div class="relative p-1.5 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-[2.5rem] shadow-2xl">
+                                <div class="bg-white p-1 rounded-[2.3rem]">
+                                    {% if creator.profile.avater %}
+                                        <img src="{% thumbnail creator.profile.avater 150x150 %}" class="w-32 h-32 rounded-[2rem] object-cover">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ creator.username }}&background=6366f1&color=fff&size=150" class="w-32 h-32 rounded-[2rem]">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="absolute -top-3 -right-3 bg-yellow-400 text-black text-[9px] font-black px-3 py-1.5 rounded-xl shadow-lg border-2 border-white uppercase tracking-widest">
+                                Rank #{{ forloop.counter }}
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="font-black text-gray-900 group-hover/item:text-indigo-600 transition-colors">@{{ creator.username }}</h4>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ creator.total_images }} Shots</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+
+                    {% for creator in top_creators %}
+                    <a href="{{ creator.get_absolute_url }}" class="flex flex-col items-center gap-4 min-w-[200px] group/item transition-all">
+                        <div class="relative p-1.5 bg-gray-100 rounded-[2.5rem]">
+                            <div class="bg-white p-1 rounded-[2.3rem]">
+                                {% if creator.profile.avater %}
+                                    <img src="{% thumbnail creator.profile.photo 150x150 %}" class="w-32 h-32 rounded-[2rem] object-cover grayscale group-hover/item:grayscale-0 transition-all duration-700">
+                                {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ creator.username }}&background=6366f1&color=fff&size=150" class="w-32 h-32 rounded-[2rem]">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h4 class="font-black text-gray-900 uppercase text-xs tracking-widest">@{{ creator.username }}</h4>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-10 flex items-center justify-between">
+        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Community <span class="text-gray-400 font-medium">({{ users.count }})</span></h2>
+    </div>
+
+    <div id="people-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+        {% for user in users %}
+        <div class="group relative bg-white rounded-[3rem] p-8 transition-all duration-700 hover:shadow-[0_30px_60px_-15px_rgba(99,102,241,0.15)] hover:-translate-y-3 border border-gray-100 overflow-hidden animate-fade-in">
+            <a href="{{ user.get_absolute_url }}" class="absolute inset-0 z-20"></a>
+            
+            <div class="relative z-10 flex flex-col items-center text-center">
+                <div class="relative mb-8">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-full animate-spin-slow opacity-0 group-hover:opacity-100 transition-opacity duration-700 p-[3px]">
+                        <div class="h-full w-full bg-white rounded-full"></div>
+                    </div>
+                    <div class="relative p-1.5 bg-white rounded-full shadow-xl">
+                        {% if user.profile.avater %}
+                            <img src="{% thumbnail user.profile.avater 180x180 %}" class="h-28 w-28 rounded-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=6366f1&color=fff" class="h-28 w-28 rounded-full transition-transform">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-gray-400 text-[11px] font-black uppercase tracking-widest mt-1">@{{ user.username }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 w-full pt-6 border-t border-gray-50">
+                    <div class="text-center border-r border-gray-50">
+                        <span class="block text-xl font-black text-gray-900">{{ user.followers.count }}</span>
+                        <span class="text-[9px] text-gray-400 font-black uppercase tracking-tighter">Followers</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-xl font-black text-gray-900">{{ user.image_create.count }}</span>
+                        <span class="text-[9px] text-gray-400 font-black uppercase tracking-tighter">Creations</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    @keyframes horizontalScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-horizontal-scroll { 
+        animation: horizontalScroll 30s linear infinite; 
+    }
+    .animate-fade-in { animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .animate-spin-slow { animation: spin-slow 6s linear infinite; }
+    .hover\:pause:hover { animation-play-state: paused; }
+
+    {% for i in "12345678" %}
+    #people-list > div:nth-child({{ forloop.counter }}) { animation-delay: {{ forloop.counter }}00ms; }
+    {% endfor %}
+</style>
+{% endblock %}

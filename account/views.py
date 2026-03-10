@@ -14,7 +14,12 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import UserUpdateForm,ProfileUpdateForm
 from images.models import Image
-
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import Contact
+from django.db.models import Count
+from account.utils import create_action
 
 def login(request):
 
@@ -176,3 +181,41 @@ def profile_update(request):
     }
 
     return render(request,'account/profile.html',context)
+
+
+@login_required
+def user_list(request):
+    users = User.objects.filter(is_active=True)
+    top_creators = User.objects.annotate(
+        total_images=Count('image_create')
+    ).order_by('-total_images')[:4]
+    return render(request, 'account/user/user_list.html', 
+                  {'section': 'people', 'users': users,'top_creators': top_creators})
+
+# নির্দিষ্ট ইউজারের প্রোফাইল এবং তার ফলোয়ার সংখ্যা দেখাবে
+@login_required
+def user_detail(request, username):
+    user = get_object_or_404(User, username=username, is_active=True)
+    return render(request, 'account/user/user_detail.html', 
+                  {'section': 'people', 'user': user,})
+
+@login_required
+@require_POST
+def user_follow(request):
+    user_id = request.POST.get('id')
+    action = request.POST.get('action')
+    if action == 'follow':
+        Contact.objects.get_or_create(user_from=request.user, user_to=user)
+        # এখানে অ্যাকশন তৈরি হবে
+        create_action(request.user, 'is following', user)
+    if user_id and action:
+        try:
+            user = User.objects.get(id=user_id)
+            if action == 'follow':
+                Contact.objects.get_or_create(user_from=request.user, user_to=user)
+            else:
+                Contact.objects.filter(user_from=request.user, user_to=user).delete()
+            return JsonResponse({'status': 'ok'}) # এটি ঠিক আছে কি না দেখুন
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid data'})

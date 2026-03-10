@@ -10,7 +10,7 @@ from .models import Image,Comment
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from account.utils import create_action
 @login_required
 def image_create(request):
     if request.method == 'POST':
@@ -34,7 +34,8 @@ def image_create(request):
             
             # ৪. এবার ফাইনালি সব ডাটা একসাথে সেভ করুন
             new_image.save()
-            
+            new_image = form.save()
+            create_action(request.user, 'bookmarked image', new_image)
             messages.success(request, 'Image added successfully')
             return redirect('dashboard') # বা আপনার ইচ্ছেমতো পেজ
     else:

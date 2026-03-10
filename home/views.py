@@ -4,6 +4,7 @@ from images.models import Image
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Count
+from account.models import Action
 # Create your views here.
 
 
@@ -37,9 +38,42 @@ def home(request):
     return render(request, 'home.html', context)
 @login_required
 def dashboard(request):
-    images=Image.objects.filter(user=request.user)
-    print(images)
-    context={
-        'images':images
+    # ১. আপনার নিজের আপলোড করা ছবিগুলো
+    images = Image.objects.filter(user=request.user)
+    
+    # ২. অ্যাকশন ফিড লজিক:
+    actions = Action.objects.exclude(user=request.user)
+    following_ids = request.user.following.values_list('id', flat=True)
+    
+    if following_ids:
+        actions = actions.filter(user_id__in=following_ids)
+    
+    # অপ্টিমাইজেশন
+    actions = actions.select_related('user', 'user__profile').prefetch_related('target')
+
+    # ৩. প্যাগিনেশন সেটআপ (প্রতিবারে ১০টি করে অ্যাকশন দেখাবে)
+    paginator = Paginator(actions, 10)
+    page = request.GET.get('page')
+    
+    try:
+        actions = paginator.page(page)
+    except PageNotAnInteger:
+        # যদি পেজ নাম্বার না থাকে, তবে প্রথম পেজ দেখাবে
+        actions = paginator.page(1)
+    except EmptyPage:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            # যদি স্ক্রল করতে করতে শেষে চলে আসে এবং AJAX রিকোয়েস্ট হয়, তবে খালি রেসপন্স পাঠাবে
+            return HttpResponse('')
+        # সাধারণ রিকোয়েস্টে শেষ পেজ দেখাবে
+        actions = paginator.page(paginator.num_pages)
+
+    # ৪. AJAX রিকোয়েস্ট হ্যান্ডেল করা (ইনফিনিট স্ক্রলের জন্য)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'actions/action/list.html', {'actions': actions})
+
+    context = {
+        'section': 'dashboard',
+        'images': images,
+        'actions': actions,
     }
-    return render(request, 'dashboard.html',context)
+    return render(request, 'dashboard.html', context)

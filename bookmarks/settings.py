@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'crispy_forms',
     'crispy_tailwind',
+    'easy_thumbnails',
     'account.apps.AccountConfig',
     'home',
     'images',
@@ -170,3 +172,6 @@ EMAIL_HOST_USER = 'shakilahmed.pbl@gmail.com'
 EMAIL_HOST_PASSWORD = 'odhzphwwpyupwobd'
 # settings.py
 DEFAULT_FROM_EMAIL = 'Bookmarks<shakilahmed.pbl@gmail.com>'
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda u: reverse_lazy('user_detail', args=[u.username])
+}
