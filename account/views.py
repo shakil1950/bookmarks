@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_list_or_404
-from .forms import RegistrationForm
+from .forms import RegistrationForm,ChangePaswordForm
 from django.contrib import messages
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.models import User
@@ -17,9 +17,13 @@ from images.models import Image
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Contact
+from .models import Contact,Action
 from django.db.models import Count
+from django.db.models import Q
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import update_session_auth_hash
 from account.utils import create_action
+from django.core.paginator import Paginator
 
 def login(request):
 
@@ -126,9 +130,7 @@ class CustomResetPasswordView(PasswordResetView):
             messages.error(request, "Invalid username!")
         
         return render(request, self.template_name)
-@login_required
-def changepassword(request):
-    pass
+
 
 @login_required
 def profile_view(request):
@@ -192,7 +194,6 @@ def user_list(request):
     return render(request, 'account/user/user_list.html', 
                   {'section': 'people', 'users': users,'top_creators': top_creators})
 
-# নির্দিষ্ট ইউজারের প্রোফাইল এবং তার ফলোয়ার সংখ্যা দেখাবে
 @login_required
 def user_detail(request, username):
     user = get_object_or_404(User, username=username, is_active=True)
@@ -204,18 +205,88 @@ def user_detail(request, username):
 def user_follow(request):
     user_id = request.POST.get('id')
     action = request.POST.get('action')
-    if action == 'follow':
-        Contact.objects.get_or_create(user_from=request.user, user_to=user)
-        # এখানে অ্যাকশন তৈরি হবে
-        create_action(request.user, 'is following', user)
+    
     if user_id and action:
         try:
             user = User.objects.get(id=user_id)
+            
             if action == 'follow':
                 Contact.objects.get_or_create(user_from=request.user, user_to=user)
+                
+                create_action(request.user, 'is following', user)
             else:
                 Contact.objects.filter(user_from=request.user, user_to=user).delete()
-            return JsonResponse({'status': 'ok'}) # এটি ঠিক আছে কি না দেখুন
+                
+                create_action(request.user, 'stopped following', user)
+            
+            return JsonResponse({'status': 'ok'})
+            
         except User.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'User not found'})
+            
     return JsonResponse({'status': 'error', 'message': 'Invalid data'})
+@login_required
+def notification_api(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'notifications': []})
+    actions = Action.objects.exclude(user=request.user).filter(
+        Q(target_id=request.user.id) | Q(user__id__in=request.user.following.values_list('id', flat=True))
+    ).select_related('user').order_by('-created')[:10]
+
+    data = []
+    for act in actions:
+        data.append({
+            'id': act.id,
+            'user': act.user.username,
+            'verb': act.verb,
+            'created': act.created.strftime('%b %d, %H:%M')
+        })
+    return JsonResponse({'notifications': data})
+
+@login_required
+def activity_list(request):
+    actions = Action.objects.all().select_related('user', 'user__profile')
+    paginator = Paginator(actions, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    if request.GET.get('ajax'):
+        activity_data = []
+        for act in page_obj:
+            activity_data.append({
+                'id': act.id,
+                'user': act.user.username,
+                'user_avatar': act.user.profile.avater.url if act.user.profile.avater else f"https://ui-avatars.com/api/?name={act.user.username}",
+                'verb': act.verb,
+                'created': act.created.strftime("%b %d, %H:%M")
+            })
+        return JsonResponse({
+            'activities': activity_data,
+            'has_next': page_obj.has_next()
+        })
+    
+    return render(request, 'account/activity_list.html', {'page_obj': page_obj})
+
+@login_required
+def change_password(request):
+    form=ChangePaswordForm()
+    if request.method=="POST":
+        form=ChangePaswordForm(request.POST)
+        if form.is_valid():
+            pass1=form.cleaned_data['pass1']
+            prev_pass=form.cleaned_data['prev_pass']
+            if not check_password(prev_pass,request.user.password):
+                messages.error(request,'Wrong current password')
+                return redirect('change-password')
+            else:
+                request.user.set_password(pass1)
+                request.user.save()
+                update_session_auth_hash(request,request.user)
+                messages.success(request,'password change successfully')
+                return redirect('profile_view')
+    else:
+        form=ChangePaswordForm()
+    context={
+        'form':form
+    }
+    return render(request,'account/change-password.html',context)

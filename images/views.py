@@ -11,6 +11,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from account.utils import create_action
+import redis
+from django.conf import settings
+
+
 @login_required
 def image_create(request):
     if request.method == 'POST':
@@ -54,18 +58,28 @@ def list_image(request):
     return render(request,'image/list.html',context)
 
 
+
+r = redis.Redis(host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                db=settings.REDIS_DB)
+
+
+
 def image_detail(request, id, slug):
    
     image = get_object_or_404(Image, id=id, slug=slug)
     back_url = request.META.get('HTTP_REFERER')
-    
-    # যদি আগের কোনো লিঙ্ক না থাকে, তবে ডিফল্ট হিসেবে হোম পেজে পাঠাবে
+  
+    total_views = r.incr(f'image:{image.id}:views')
+    r.zincrby('image_ranking', 1, image.id)
+   
     if not back_url:
         back_url = '/'
     return render(request, 'image/detail.html', {
         'section': 'images',
         'image': image,
-        'back_url':back_url
+        'back_url':back_url,
+        'total_views': total_views
     })
 
 @login_required
@@ -103,3 +117,56 @@ def image_comment(request):
         except Image.DoesNotExist:
             return JsonResponse({'status': 'error'})
     return JsonResponse({'status': 'error'})
+
+
+@login_required
+def image_ranking(request):
+ 
+    image_ranking = r.zrevrange('image_ranking', 0, -1, withscores=True)[:100]
+    
+    image_ranking_ids = [int(id) for id, score in image_ranking]
+    
+   
+    most_viewed = list(Image.objects.filter(id__in=image_ranking_ids))
+
+    most_viewed.sort(key=lambda x: image_ranking_ids.index(x.id))
+    
+    return render(request, 'image/ranking.html', {
+        'section': 'ranking',
+        'most_viewed': most_viewed
+    })
+
+
+@login_required
+def delete_bookmark_image(request, id):
+    image = get_object_or_404(Image, id=id)
+    
+   
+    if image.user == request.user or request.user.is_superuser:
+        
+        
+        r.delete(f'image:{image.id}:views')
+        r.zrem('image_ranking', image.id)
+        
+   
+        image.delete()
+        
+      
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.method == 'POST':
+            return JsonResponse({'status': 'ok', 'message': 'Deleted successfully'})
+
+      
+        messages.success(request, 'Image deleted successfully!')
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+        
+    else:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
+            
+        messages.error(request, 'You are not authorized to delete this image.')
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+  
+    
+    
+    

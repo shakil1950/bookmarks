@@ -1,7 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
-# Create your models here.
+import redis
+from django.conf import settings
+
+# রেডিস কানেকশন
+r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
 from django.utils.text import slugify
 def user_directory_path(instance, filename):
     # ফাইলটি 'user_<id>/<filename>' এই ফরম্যাটে আপলোড হবে
@@ -39,6 +43,12 @@ class Image(models.Model):
     def get_absolute_url(self):
         # এটি 'images:detail' নামে আপনার তৈরি করা URL-এ পাঠিয়ে দিবে
         return reverse('detail', args=[self.id, self.slug])
+    
+    @property
+    def total_views(self):
+        # রেডিস থেকে সরাসরি ভিউ সংখ্যা নিয়ে আসবে
+        v = r.get(f'image:{self.id}:views')
+        return int(v) if v else 0
 
 class Comment(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name='comments')

@@ -1,123 +1,211 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard | Feed{% endblock %}
+{% block title %}Dashboard | Inspiration Feed{% endblock %}
 
 {% block content %}
-<div class="max-w-[1400px] mx-auto px-6 py-10">
+<div class="max-w-[1400px] mx-auto px-6 py-10" x-data="followingFeed()" x-cloak>
     <div class="relative bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[3rem] p-10 mb-10 overflow-hidden shadow-2xl">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
         <div class="relative z-10 flex flex-col md:flex-row justify-between items-center text-white">
             <div>
                 <h1 class="text-4xl font-black tracking-tighter">Hello, {{ request.user.first_name|default:request.user.username }}! ✨</h1>
-                <p class="text-indigo-100 mt-2 font-medium">Here's what's happening in your creative circle.</p>
+                <p class="text-indigo-100 mt-2 font-medium">Here's the latest inspiration from the people you follow.</p>
             </div>
             
             <div class="mt-8 md:mt-0 bg-white/10 backdrop-blur-md p-6 rounded-[2rem] border border-white/20 text-center">
                 <p class="text-[10px] font-black uppercase tracking-widest mb-3 text-indigo-200">Bookmark Tool</p>
                 <a href="javascript:{% include 'image/bookmarklet_launcher.js' %}" 
                    class="inline-block px-8 py-3 bg-white text-indigo-600 font-black rounded-full shadow-lg hover:bg-indigo-50 transition-all transform hover:scale-105 active:scale-95 cursor-move text-sm">
-                   🔖 Drag to Bookmarks
+                    🔖 Drag to Bookmarks
                 </a>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-hover hover:shadow-md">
-            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Images</span>
+        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Your Images</span>
             <p class="text-3xl font-black text-gray-900 mt-1">{{ images.count }}</p>
         </div>
-        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-hover hover:shadow-md">
+        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Followers</span>
             <p class="text-3xl font-black text-gray-900 mt-1">{{ request.user.followers.count }}</p>
         </div>
-        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-hover hover:shadow-md">
+        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Following</span>
             <p class="text-3xl font-black text-gray-900 mt-1">{{ request.user.following.count }}</p>
         </div>
-        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-hover hover:shadow-md">
-            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Last Login</span>
-            <p class="text-sm font-black text-indigo-600 mt-2 uppercase tracking-tight">{{ request.user.last_login|timesince }} ago</p>
+        <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Active Feed</span>
+            <p class="text-sm font-black text-indigo-600 mt-2 uppercase tracking-tight">Real-time Updates</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        
         <div class="lg:col-span-2 space-y-8">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-3xl font-black text-gray-900 tracking-tighter italic underline decoration-indigo-500 decoration-4 underline-offset-8">Activity Feed</h2>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-3xl font-black text-gray-900 tracking-tighter italic underline decoration-indigo-500 decoration-4 underline-offset-8">Following Feed</h2>
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest" x-text="items.length + ' Posts Loaded'"></span>
+            </div>
+            
+            <div class="columns-1 md:columns-2 gap-6 space-y-6" id="photo-feed">
+                <template x-for="item in items" :key="item.id">
+                    <div x-show="!item.isDeleting" 
+                        x-transition:leave="transition ease-in duration-500"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-90"
+                    class="break-inside-avoid flex flex-col group mb-6">
+                        <div class="flex items-center gap-3 mb-3 px-2">
+                            <a :href="item.user_url" class="relative hover:scale-110 transition-transform duration-300">
+                                <img :src="item.user_avatar" class="w-10 h-10 rounded-full object-cover ring-2 ring-white shadow-sm border border-gray-100">
+                            </a>
+                            <div class="flex flex-col">
+                                <a :href="item.user_url" class="text-[12px] font-black text-gray-900 uppercase tracking-widest hover:text-indigo-600 transition-colors" x-text="item.user"></a>
+                                <span class="text-[10px] font-bold text-gray-400" x-text="item.created"></span>
+                            </div>
+                        </div>
+
+                        <div class="relative bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                            <img :src="item.image" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110">
+                            
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-6 z-10">
+                                
+                                <div class="flex justify-end">
+                                    <template x-if="item.can_delete">
+                                        <button @click.stop="deleteImage(item.id)" 
+                                                class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md text-white hover:bg-red-500 hover:scale-110 transition-all duration-300 shadow-lg flex items-center justify-center border border-white/20">
+                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <div class="flex items-center justify-between">
+                                    <p class="text-white font-bold text-sm tracking-wide truncate pr-4" x-text="item.title"></p>
+                                    <a :href="item.url" class="w-8 h-8 rounded-xl bg-white text-indigo-600 flex items-center justify-center hover:bg-indigo-50 transition-colors shadow-lg">
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
 
-            <div id="action-list" class="space-y-6">
-                {% for action in actions %}
-                    {% include "actions/action/action_detail.html" %}
-                {% empty %}
-                    <div class="bg-gray-50 rounded-[3rem] py-20 text-center border-2 border-dashed border-gray-200">
-                        <p class="text-gray-400 font-bold italic">No activity yet. Follow people to see their updates!</p>
-                    </div>
-                {% endfor %}
+            <div x-show="loading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="animate-pulse bg-gray-100 h-64 rounded-[2.5rem]"></div>
+                <div class="animate-pulse bg-gray-100 h-80 rounded-[2.5rem]"></div>
+            </div>
+
+            <div x-show="!loading && items.length === 0 && !hasNext" class="bg-gray-50 rounded-[3rem] py-20 text-center border-2 border-dashed border-gray-200">
+                <p class="text-gray-400 font-bold italic">Follow more people to see their creative work here!</p>
+                <a href="{% url 'user_list' %}" class="inline-block mt-4 px-6 py-2 bg-indigo-600 text-white rounded-full font-black text-xs uppercase tracking-widest">Find People</a>
             </div>
         </div>
 
         <div class="space-y-8">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-black text-gray-900 tracking-tighter">Your Library</h2>
-                <a href="{% url "list_image" %}" class="text-[10px] font-black uppercase text-indigo-600 tracking-widest hover:underline">View All</a>
-            </div>
+            <div class="sticky top-10">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-black text-gray-900 tracking-tighter">Your Library</h2>
+                    <a href="{% url 'list_image' %}" class="text-[10px] font-black uppercase text-indigo-600 tracking-widest hover:underline">View All</a>
+                </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                {% for image in images|slice:":6" %}
-                    <div class="group relative aspect-square rounded-[2rem] overflow-hidden bg-gray-100 shadow-sm transition-all hover:shadow-xl">
-                        <img src="{{ image.image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
-                            <p class="text-white text-[10px] font-black text-center uppercase tracking-tighter">{{ image.title|truncatechars:15 }}</p>
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    {% for image in images|slice:":6" %}
+                        <div class="group relative aspect-square rounded-[2rem] overflow-hidden bg-gray-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+                            <img src="{{ image.image.url }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center">
+                                <p class="text-white text-[10px] font-black uppercase tracking-tighter">{{ image.title|truncatechars:15 }}</p>
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
 
-            <div class="bg-indigo-50 rounded-[2.5rem] p-8 mt-10">
-                <h4 class="text-indigo-900 font-black text-lg mb-4">Pro Tip 💡</h4>
-                <p class="text-indigo-700/80 text-sm font-medium leading-relaxed">
-                    Follow other artists to populate your feed with inspiration. Every time they bookmark an image, you'll see it here!
-                </p>
+                <div class="bg-indigo-50 rounded-[2.5rem] p-8">
+                    <h4 class="text-indigo-900 font-black text-lg mb-4">Pro Tip 💡</h4>
+                    <p class="text-indigo-700/80 text-sm font-medium leading-relaxed">
+                        Follow creators to see their images in your feed. This helps you discover trends and stay inspired!
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    body { ; }
-    .transition-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-</style>
-
 <script>
-    var page = 1;
-    var empty_page = false;
-    var block_request = false;
-
-    window.addEventListener('scroll', function() {
-        var margin = document.body.clientHeight - window.innerHeight - 200;
-        if (window.pageYOffset > margin && !empty_page && !block_request) {
-            block_request = true;
-            page += 1;
+    function followingFeed() {
+        return {
+            items: [],
+            page: 1,
+            hasNext: true,
+            loading: false,
             
-            fetch('?page=' + page, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+            init() {
+                this.loadMore();
+                window.addEventListener('scroll', () => {
+                    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+                        this.loadMore();
+                    }
+                });
+            },
+
+            async loadMore() {
+                if (this.loading || !this.hasNext) return;
+                this.loading = true;
+                
+                try {
+                    let response = await fetch(`${window.location.pathname}?page=${this.page}&ajax=1`);
+                    let data = await response.json();
+                    
+                    if (data.images && data.images.length > 0) {
+                        this.items = [...this.items, ...data.images];
+                        this.hasNext = data.has_next;
+                        this.page++;
+                    } else {
+                        this.hasNext = false;
+                    }
+                } catch (e) {
+                    console.error("Error loading feed:", e);
+                    this.hasNext = false;
                 }
-            })
-            .then(response => response.text())
-            .then(html => {
-                if (html === '') {
-                    empty_page = true;
-                } else {
-                    var actionList = document.getElementById('action-list');
-                    actionList.insertAdjacentHTML('beforeend', html);
-                    block_request = false;
+                this.loading = false;
+            },
+
+            async deleteImage(id) {
+                    if (!confirm('Are you sure?')) return;
+
+                    try {
+                        let response = await fetch(`/image/delete/${id}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (response.ok) {
+                           
+                            const index = this.items.findIndex(i => i.id === id);
+                            if (index !== -1) {
+                                this.items[index].isDeleting = true;
+                                
+                                
+                                setTimeout(() => {
+                                    this.items = this.items.filter(item => item.id !== id);
+                                }, 500);
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Delete error:", e);
+                    }
                 }
-            });
         }
-    });
+    }
 </script>
+
+<style>
+    [x-cloak] { display: none !important; }
+    .break-inside-avoid { break-inside: avoid; }
+    #photo-feed { column-fill: balance; }
+    .transition-all { transition-property: all; }
+</style>
 {% endblock %}

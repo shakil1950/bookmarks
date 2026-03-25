@@ -101,6 +101,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'account.context_processors.notifications'
             ],
         },
     },
@@ -175,3 +176,7 @@ DEFAULT_FROM_EMAIL = 'Bookmarks<shakilahmed.pbl@gmail.com>'
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse_lazy('user_detail', args=[u.username])
 }
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0

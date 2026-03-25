@@ -5,14 +5,25 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Count
 from account.models import Action
+from django.http import JsonResponse
+import redis
+from django.conf import settings
 # Create your views here.
-
+r = redis.Redis(host=settings.REDIS_HOST,
+                port=settings.REDIS_PORT,
+                db=settings.REDIS_DB)
 
 def home(request):
     images_list = Image.objects.annotate(
         total_comments=Count('comments') # 'comments' হলো আপনার Comment মডেলের related_name
     ).order_by('-created_at')# নতুন ছবি আগে দেখাবে
+    trending_ids = r.zrevrange('image_ranking', 0, 10)
+    trending_ids = [int(id) for id in trending_ids]
     
+    # ২. ডাটাবেস থেকে ওই ইমেজগুলো আনা
+    
+    trending_images = list(Image.objects.filter(id__in=trending_ids))
+    trending_images.sort(key=lambda x: trending_ids.index(x.id))
     # পেজিনেশন: প্রতি পেজে ৮টি করে ছবি
     paginator = Paginator(images_list, 8) 
     page = request.GET.get('page')
@@ -33,47 +44,70 @@ def home(request):
     
     context = {
         'images': images,
-        'view_source': 'feed'
+        'view_source': 'feed',
+        'trending_images':trending_images,
+        
     }
     return render(request, 'home.html', context)
+
+
 @login_required
 def dashboard(request):
-    # ১. আপনার নিজের আপলোড করা ছবিগুলো
-    images = Image.objects.filter(user=request.user)
     
-    # ২. অ্যাকশন ফিড লজিক:
-    actions = Action.objects.exclude(user=request.user)
+    user_images = Image.objects.filter(user=request.user)
+    
+    
     following_ids = request.user.following.values_list('id', flat=True)
-    
-    if following_ids:
-        actions = actions.filter(user_id__in=following_ids)
-    
-    # অপ্টিমাইজেশন
-    actions = actions.select_related('user', 'user__profile').prefetch_related('target')
+    images_feed_list = Image.objects.filter(user_id__in=following_ids)\
+                                   .select_related('user')\
+                                   .order_by('-created_at')
 
-    # ৩. প্যাগিনেশন সেটআপ (প্রতিবারে ১০টি করে অ্যাকশন দেখাবে)
-    paginator = Paginator(actions, 10)
+   
+    paginator = Paginator(images_feed_list, 8)
     page = request.GET.get('page')
     
     try:
-        actions = paginator.page(page)
+        images_feed = paginator.page(page)
     except PageNotAnInteger:
-        # যদি পেজ নাম্বার না থাকে, তবে প্রথম পেজ দেখাবে
-        actions = paginator.page(1)
+        images_feed = paginator.page(1)
     except EmptyPage:
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            # যদি স্ক্রল করতে করতে শেষে চলে আসে এবং AJAX রিকোয়েস্ট হয়, তবে খালি রেসপন্স পাঠাবে
-            return HttpResponse('')
-        # সাধারণ রিকোয়েস্টে শেষ পেজ দেখাবে
-        actions = paginator.page(paginator.num_pages)
+        if request.GET.get('ajax'):
+            return JsonResponse({'images': [], 'has_next': False})
+        images_feed = paginator.page(paginator.num_pages)
 
-    # ৪. AJAX রিকোয়েস্ট হ্যান্ডেল করা (ইনফিনিট স্ক্রলের জন্য)
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'actions/action/list.html', {'actions': actions})
+  
+    if request.GET.get('ajax'):
+        image_data = []
+        for img in images_feed:
+            
+            try:
+              
+                
+                if hasattr(img.user, 'profile') and img.user.profile.avater:
+                    avatar_url = img.user.profile.avater.url
+                else:
+                    avatar_url = f"https://ui-avatars.com/api/?name={img.user.username}"
+            except:
+                avatar_url = f"https://ui-avatars.com/api/?name={img.user.username}"
 
-    context = {
+            image_data.append({
+                'id': img.id,
+                'title': img.title,
+                'image': img.image.url,
+                'url': img.get_absolute_url(),
+                'user': img.user.username,
+                'user_avatar': avatar_url,
+                'user_url': img.user.get_absolute_url(),
+                'created': img.created_at.strftime("%d %b"),
+                'can_delete': (img.user == request.user or request.user.is_superuser),
+            })
+        return JsonResponse({
+            'images': image_data,
+            'has_next': images_feed.has_next()
+        })
+
+    return render(request, 'dashboard.html', {
         'section': 'dashboard',
-        'images': images,
-        'actions': actions,
-    }
-    return render(request, 'dashboard.html', context)
+        'images': user_images,
+        'images_feed': images_feed,
+    })

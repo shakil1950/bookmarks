@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load utils %}
+
+{% block title %}Trending Leaderboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#fafafa] py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 mb-4">
+                    <i class="fa-solid fa-bolt-lightning text-xs"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Real-time Ranking</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">Most Viewed</h1>
+            </div>
+            <p class="text-gray-400 text-sm font-medium max-w-xs md:text-right">
+                Rankings are calculated based on live traffic and community engagement.
+            </p>
+        </div>
+
+        <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+            {% for image in most_viewed %}
+            <div class="relative break-inside-avoid group bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500">
+                
+                <div class="absolute top-4 left-4 z-20">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl backdrop-blur-md {% if forloop.counter == 1 %}bg-yellow-400 text-white shadow-lg shadow-yellow-200{% elif forloop.counter == 2 %}bg-gray-200 text-gray-600{% elif forloop.counter == 3 %}bg-orange-400 text-white shadow-lg shadow-orange-100{% else %}bg-black/50 text-white{% endif %} font-black italic shadow-sm">
+                        #{{ forloop.counter }}
+                    </div>
+                </div>
+
+                <div class="relative overflow-hidden">
+                    <img src="{{ image.image.url }}" class="w-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ image.title }}">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                        <h3 class="text-white font-bold text-lg mb-4 truncate">{{ image.title }}</h3>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex gap-3">
+                                <div class="flex flex-col items-center">
+                                    <span class="text-white text-xs font-black">{{ image.total_views|number_format }}</span>
+                                    <span class="text-gray-400 text-[8px] uppercase font-bold tracking-tighter">Views</span>
+                                </div>
+                                <div class="flex flex-col items-center border-l border-white/20 pl-3">
+                                    <span class="text-white text-xs font-black">{{ image.users_like.count|number_format }}</span>
+                                    <span class="text-gray-400 text-[8px] uppercase font-bold tracking-tighter">Likes</span>
+                                </div>
+                                <div class="flex flex-col items-center border-l border-white/20 pl-3">
+                                    <span class="text-white text-xs font-black">{{ image.comments.count|number_format }}</span>
+                                    <span class="text-gray-400 text-[8px] uppercase font-bold tracking-tighter">Chats</span>
+                                </div>
+                            </div>
+                            
+                            <a href="{{ image.get_absolute_url }}" class="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-center justify-between bg-white">
+                    <div class="flex items-center gap-2">
+                        <img src="https://ui-avatars.com/api/?name={{ image.user.username }}&background=random" class="w-6 h-6 rounded-lg shadow-sm">
+                        <span class="text-xs font-bold text-gray-700">@{{ image.user.username }}</span>
+                    </div>
+                    <div class="w-1.5 h-1.5 rounded-full {% if forloop.counter <= 3 %}bg-green-500 animate-pulse{% else %}bg-gray-300{% endif %}"></div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <p class="text-gray-400 italic">No rankings available yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Prevent image stretching in Masonry */
+    .break-inside-avoid {
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+</style>
+{% endblock %}

@@ -2,8 +2,8 @@
 <div class="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm transition-all hover:translate-x-1 flex gap-4 items-center">
     
     <div class="w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0 border-2 border-white shadow-sm">
-        {% if profile.photo %}
-            <img src="{{ profile.photo.url }}" class="w-full h-full object-cover">
+        {% if profile.avater %}
+            <img src="{{ profile.avater.url }}" class="w-full h-full object-cover">
         {% else %}
             <div class="w-full h-full flex items-center justify-center font-black text-indigo-400 bg-indigo-50 text-xs">
                 {{ user.username|slice:":1"|upper }}

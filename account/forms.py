@@ -95,3 +95,37 @@ class ProfileUpdateForm(forms.ModelForm):
         self.helper.layout = Layout(
             Field('avater', css_class="file-input-style")
         )
+
+class ChangePaswordForm(forms.Form):
+    prev_pass=forms.CharField(
+        label='Current Password',
+        widget=forms.PasswordInput(attrs={
+            'class':'form-control passfield',
+            'placeholder':'Enter current password'
+        })
+    )
+    pass1=forms.CharField(
+        label='New Password',
+        widget=forms.PasswordInput(
+            attrs={
+                'class':'form-control passfield',
+                'placeholder':'Enter new password'
+            }
+        )
+    )
+    pass2=forms.CharField(
+        label='Confirm Password',
+        widget=forms.PasswordInput(attrs={
+            'class':'form-control passfield',
+            'placeholder':'Enter confirm password'
+        })
+    )
+
+    def clean(self):
+        cleaned_data=super().clean()
+        pass1=cleaned_data.get('pass1')
+        pass2=cleaned_data.get('pass2')
+
+        if pass1 and pass2 and pass1!=pass2:
+            raise forms.ValidationError('Password not match')
+        return cleaned_data

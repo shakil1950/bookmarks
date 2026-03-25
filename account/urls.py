@@ -24,5 +24,7 @@ urlpatterns = [
     path('users/', views.user_list, name='user_list'),
     path('users/follow/', views.user_follow, name='user_follow'),
     path('users/<username>/', views.user_detail, name='user_detail'),
-    
+    path('notifications/api/', views.notification_api, name='notification_api'),
+    path('activities/', views.activity_list, name='activity_list'),
+    path('change_password/',views.change_password,name='change_password')
 ]

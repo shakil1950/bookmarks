@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Stream{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12" 
+     x-data="{ 
+        activities: [], 
+        page: 1, 
+        hasNext: true, 
+        loading: false,
+        async loadMore() {
+            if (this.loading || !this.hasNext) return;
+            this.loading = true;
+            try {
+                // বর্তমান URL থেকে AJAX ডেটা আনা
+                let response = await fetch(`${window.location.pathname}?page=${this.page}&ajax=1`);
+                let data = await response.json();
+                
+                // আপনার View যদি 'activities' নামে ডাটা পাঠায়, তবে এটি নিশ্চিত করুন:
+                let newItems = data.activities || data.notifications || [];
+                
+                if (newItems.length > 0) {
+                    this.activities = [...this.activities, ...newItems];
+                    this.hasNext = data.has_next;
+                    this.page++;
+                } else {
+                    this.hasNext = false;
+                }
+            } catch (e) { 
+                console.error('Error loading data:', e); 
+            }
+            this.loading = false;
+        }
+     }" 
+     x-init="loadMore()"
+     @scroll.window="if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) loadMore()">
+
+    <div class="mb-10 space-y-2">
+        <h1 class="text-4xl font-black text-gray-900 tracking-tight">Activity Feed</h1>
+        <div class="flex items-center gap-3">
+            <span class="h-1 w-12 bg-indigo-600 rounded-full"></span>
+            <p class="text-gray-500 font-bold text-sm uppercase tracking-widest">Real-time community updates</p>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <template x-if="activities.length === 0 && !loading">
+            <div class="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                <p class="text-gray-400 font-bold uppercase tracking-widest text-xs">No activities found yet</p>
+            </div>
+        </template>
+
+        <template x-for="activity in activities" :key="activity.id">
+            <div class="group bg-white/70 backdrop-blur-md border border-gray-100 p-6 rounded-[2.5rem] hover:bg-white hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-500 flex items-center gap-6">
+                
+                <div class="relative flex-shrink-0">
+                    <div class="w-16 h-16 rounded-[1.5rem] overflow-hidden ring-4 ring-white shadow-sm group-hover:scale-105 transition-transform duration-500">
+                        <img :src="activity.user_avatar || 'https://ui-avatars.com/api/?name=' + activity.user" 
+                             class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center border-2 border-white shadow-lg">
+                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"></path></svg>
+                    </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-base font-black text-gray-900" x-text="'@' + activity.user"></span>
+                        <span class="text-[10px] font-black text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-tighter" x-text="activity.created"></span>
+                    </div>
+                    <p class="text-gray-600 font-medium leading-relaxed">
+                        <span class="opacity-70">just</span> 
+                        <span class="text-gray-900 font-bold" x-text="activity.verb"></span>
+                    </p>
+                </div>
+
+                <button class="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <div x-show="loading" class="mt-4 space-y-4">
+        <template x-for="i in 3" :key="i">
+            <div class="animate-pulse bg-gray-50/50 p-6 rounded-[2.5rem] flex items-center gap-6 border border-dashed border-gray-200">
+                <div class="w-16 h-16 bg-gray-200 rounded-[1.5rem]"></div>
+                <div class="flex-1 space-y-3">
+                    <div class="h-3 bg-gray-200 rounded-full w-1/4"></div>
+                    <div class="h-4 bg-gray-200 rounded-full w-3/4"></div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <div x-show="!hasNext && activities.length > 0" class="mt-12 text-center pb-10">
+        <p class="text-xs font-black text-gray-300 uppercase tracking-[0.3em]">You've reached the end ✨</p>
+    </div>
+</div>
+
+<style>
+    body { background-color: #fcfcfd; }
+</style>
+{% endblock %}

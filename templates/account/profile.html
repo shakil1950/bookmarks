@@ -59,7 +59,7 @@
                     <div class="space-y-5">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 font-bold">Change Password</span>
-                            <a href='#'><span class=" text-indigo-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-regular fa-pen-to-square"></i></span></a>
+                            <a href='{% url "change_password" %}'><span class=" text-indigo-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-regular fa-pen-to-square"></i></span></a>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 font-bold">Logout</span>
@@ -159,23 +159,21 @@
         outline: none !important;
     }
 
-    /* ১. হেল্প টেক্সট এবং কারেন্ট ফাইল লিঙ্ক হাইড করা */
     .invalid-feedback, .help-block, .form-text, .text-muted {
         display: none !important;
     }
     
-    /* ২. 'Currently' এবং 'Change' লেখাগুলো হাইড করা (ফাইল ইনপুট ক্লিন রাখা) */
     input[type="file"] {
         color: transparent;
     }
     
     .asteriskField {
-        display: none; /* লাল স্টার চিহ্ন সরিয়ে ফেলা */
+        display: none; 
     }
 
-    /* ৩. ইনপুট ফিল্ডের ডিজাইন আপনার ছবির মতো করা */
+
     input[type="text"], input[type="email"] {
-        background-color: #f8fafc !important; /* হালকা গ্রে ব্যাকগ্রাউন্ড */
+        background-color: #f8fafc !important; 
         border: 1px solid #f1f5f9 !important;
         border-radius: 12px !important;
         padding: 14px !important;
