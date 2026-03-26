@@ -66,7 +66,6 @@ class Action(models.Model):
     verb = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True,
                                    db_index=True)
-    # Generic foreign key এর জন্য (যেকোনো মডেলের সাথে কানেক্ট করার জন্য)
     target_ct = models.ForeignKey(ContentType,
                                   blank=True,
                                   null=True,

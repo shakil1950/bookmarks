@@ -1,122 +1,154 @@
 {% extends "base.html" %}
 {% load thumbnail %}
 
-{% block title %}Explore Creators{% endblock %}
+{% block title %}Explore Creators | Bookmarks{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 py-12" style="perspective: 1000px;">
-
-    <div class="relative py-20 mb-16 overflow-hidden">
-        <div class="text-center mb-16">
-            <h2 class="text-5xl font-black text-gray-900 tracking-tighter">Spotlight</h2>
-            <p class="text-indigo-500 font-black uppercase text-[10px] tracking-[0.4em] mt-2">The Creator Elite</p>
+<div class="min-h-screen bg-[#fafafa]">
+    <div class="max-w-7xl mx-auto px-6 pt-16 pb-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+                <span class="text-indigo-600 font-black text-[10px] uppercase tracking-[0.5em] mb-3 block">Top Contributors</span>
+                <h2 class="text-6xl font-black text-gray-900 tracking-tighter leading-none">Spotlight</h2>
+            </div>
+            <p class="text-gray-400 font-medium max-w-xs text-sm">Discover the most creative minds currently shaping the community.</p>
         </div>
 
-        <div class="flex gap-10 animate-carousel-3d py-10">
-            {% for creator in top_creators %}
-            <div class="creator-card-3d group">
-                <a href="{{ creator.get_absolute_url }}" class="relative block w-64 h-80">
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-[3rem] shadow-2xl transition-all duration-700 group-hover:rotate-x-12 group-hover:scale-105"></div>
-                    
-                    <div class="absolute inset-0 bg-white/10 backdrop-blur-md rounded-[3rem] border border-white/20 m-2 flex flex-col items-center justify-center p-6 text-white overflow-hidden">
-                        <div class="relative mb-6">
-                            <div class="absolute -inset-4 bg-white/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            {% if creator.profile.avater %}
-                                <img src="{% thumbnail creator.profile.avater 120x120 %}" class="w-24 h-24 rounded-full object-cover border-4 border-white/50 relative z-10 shadow-2xl">
-                            {% else %}
-                                <img src="https://ui-avatars.com/api/?name={{ creator.username }}&background=fff&color=6366f1" class="w-24 h-24 rounded-full border-4 border-white/50 relative z-10 shadow-2xl">
-                            {% endif %}
-                        </div>
+        <div class="relative overflow-hidden group/carousel py-10" style="perspective: 2000px;">
+            <div class="flex gap-8 animate-scroll hover:pause-scroll transition-all duration-500">
+                {% for creator in top_creators %}
+                <div class="relative flex-shrink-0 w-72 h-[400px] transition-all duration-500 hover:-translate-y-4">
+                    <a href="{{ creator.get_absolute_url }}" class="block h-full relative group">
+                        <div class="absolute inset-10 bg-indigo-500/30 blur-[50px] group-hover:bg-indigo-500/50 transition-all"></div>
                         
-                        <h4 class="font-black text-xl tracking-tight">@{{ creator.username }}</h4>
-                        <div class="mt-4 px-4 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest">
-                            {{ creator.total_images }} Creations
+                        <div class="relative h-full bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col items-center justify-center p-8">
+                            <div class="relative z-10 mb-6">
+                                <div class="w-28 h-28 rounded-[2rem] overflow-hidden ring-4 ring-gray-50 shadow-xl group-hover:rotate-6 transition-transform duration-500">
+                                    {% if creator.profile.avater %}
+                                        <img src="{% thumbnail creator.profile.avater 150x150 %}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ creator.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
+                                    {% endif %}
+                                </div>
+                                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
+                                    <span class="text-white text-xs font-black">{{ forloop.counter }}</span>
+                                </div>
+                            </div>
+                            
+                            <h4 class="text-xl font-black text-gray-900">@{{ creator.username }}</h4>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">{{ creator.total_images }} Masterpieces</p>
+                            
+                            <div class="mt-8 w-full py-3 bg-gray-50 rounded-2xl text-center group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                                <span class="text-[10px] font-black uppercase tracking-tighter">View Portfolio</span>
+                            </div>
                         </div>
+                    </a>
+                </div>
+                {% endfor %}
+                {% for creator in top_creators %}
+                <div class="relative flex-shrink-0 w-72 h-[400px] transition-all duration-500 hover:-translate-y-4">
+                    <a href="{{ creator.get_absolute_url }}" class="block h-full relative group">
+                        <div class="absolute inset-10 bg-indigo-500/30 blur-[50px] group-hover:bg-indigo-500/50 transition-all"></div>
                         
-                        <div class="absolute top-6 left-6 w-8 h-8 rounded-full bg-white text-indigo-600 flex items-center justify-center font-black text-xs">
-                            {{ forloop.counter }}
+                        <div class="relative h-full bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col items-center justify-center p-8">
+                            <div class="relative z-10 mb-6">
+                                <div class="w-28 h-28 rounded-[2rem] overflow-hidden ring-4 ring-gray-50 shadow-xl group-hover:rotate-6 transition-transform duration-500">
+                                    {% if creator.profile.avater %}
+                                        <img src="{% thumbnail creator.profile.avater 150x150 %}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ creator.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
+                                    {% endif %}
+                                </div>
+                                <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg">
+                                    <span class="text-white text-xs font-black">{{ forloop.counter }}</span>
+                                </div>
+                            </div>
+                            
+                            <h4 class="text-xl font-black text-gray-900">@{{ creator.username }}</h4>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">{{ creator.total_images }} Masterpieces</p>
+                            
+                            <div class="mt-8 w-full py-3 bg-gray-50 rounded-2xl text-center group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                                <span class="text-[10px] font-black uppercase tracking-tighter">View Portfolio</span>
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-            {% for creator in top_creators %}
-             <div class="creator-card-3d group">
-                <a href="{{ creator.get_absolute_url }}" class="relative block w-64 h-80">
-                    <div class="absolute inset-0 bg-gray-900 rounded-[3rem] m-2 opacity-50"></div>
-                </a>
-             </div>
-            {% endfor %}
         </div>
     </div>
 
-    <div class="flex items-center justify-between mb-8">
-        <h3 class="text-2xl font-black text-gray-900 tracking-tighter italic">World Community</h3>
-        <div class="h-[1px] flex-grow mx-8 bg-gray-100"></div>
-        <span class="text-[11px] font-black text-gray-400 uppercase tracking-widest">{{ users.count }} Artists</span>
-    </div>
-
-    <div id="people-list" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-        {% for user in users %}
-        <div class="group relative aspect-[4/5] bg-gray-50 rounded-[2rem] overflow-hidden transition-all duration-500 hover:bg-white hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] animate-pop-in">
-            <a href="{{ user.get_absolute_url }}" class="absolute inset-0 z-10"></a>
-            
-            <div class="h-full flex flex-col items-center justify-center p-4">
-                <div class="relative mb-3">
-                    {% if user.profile.avater %}
-                        <img src="{% thumbnail user.profile.avater 80x80 %}" class="w-16 h-16 rounded-2xl object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
-                    {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=6366f1&color=fff" class="w-16 h-16 rounded-2xl">
-                    {% endif %}
-                </div>
-                
-                <h5 class="text-[11px] font-black text-gray-900 truncate w-full text-center uppercase tracking-tighter">{{ user.username }}</h5>
-                <p class="text-[9px] font-bold text-gray-400 mt-0.5">{{ user.followers.count }} Fans</p>
-                
-                <div class="mt-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                    <div class="px-3 py-1 bg-indigo-600 text-white text-[8px] font-black rounded-lg uppercase tracking-widest">View</div>
-                </div>
+    <div class="max-w-7xl mx-auto px-6 py-20">
+        <div class="flex items-center gap-6 mb-12">
+            <h3 class="text-3xl font-black text-gray-900 tracking-tighter">World Community</h3>
+            <div class="h-px flex-grow bg-gray-200/60"></div>
+            <div class="px-4 py-1.5 bg-white border border-gray-100 rounded-full shadow-sm">
+                <span class="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{{ users.count }} Artists</span>
             </div>
         </div>
-        {% endfor %}
+
+        <div id="people-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {% include "account/user/list_ajax.html" %}
+        </div>
+
+        <div id="loading" class="flex justify-center mt-20 hidden">
+            <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
     </div>
 </div>
 
 <style>
-    /* 3D Animations */
-    .animate-carousel-3d {
-        display: flex;
-        animation: scroll 40s linear infinite;
+    @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .animate-scroll {
+        animation: scroll 30s linear infinite;
         width: max-content;
     }
-
-    @keyframes scroll {
-        from { transform: translateX(0); }
-        to { transform: translateX(-50%); }
+    .pause-scroll {
+        animation-play-state: paused;
     }
-
-    .creator-card-3d {
-        perspective: 1000px;
-        transition: transform 0.5s;
+    /* Smooth Pop in for grid */
+    .user-card {
+        animation: cardAppear 0.5s ease forwards;
     }
-
-    .rotate-x-12 {
-        transform: rotateX(10deg) rotateY(-10deg);
+    @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-
-    .animate-pop-in {
-        animation: pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-
-    @keyframes pop {
-        from { opacity: 0; transform: scale(0.9); }
-        to { opacity: 1; transform: scale(1); }
-    }
-
-    .hover\:pause:hover { animation-play-state: paused; }
-
-    {% for i in "123456789012345678" %}
-    #people-list > div:nth-child({{ forloop.counter }}) { animation-delay: calc({{ forloop.counter }} * 40ms); }
-    {% endfor %}
 </style>
+
+
+<script>
+    let page = 1;
+    let emptyPage = false;
+    let blockRequest = false;
+
+    window.addEventListener('scroll', function() {
+        let margin = document.body.clientHeight - window.innerHeight - 200;
+        if (window.pageYOffset > margin && !emptyPage && !blockRequest) {
+            blockRequest = true;
+            page += 1;
+            document.getElementById('loading').classList.remove('hidden');
+
+            fetch(`?page=${page}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data.trim() === '') {
+                    emptyPage = true;
+                    document.getElementById('loading').innerHTML = "<p class='text-gray-400 font-bold text-xs'>You've reached the end.</p>";
+                } else {
+                    document.getElementById('people-list').insertAdjacentHTML('beforeend', data);
+                    blockRequest = false;
+                    document.getElementById('loading').classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_list_or_404
 from .forms import RegistrationForm,ChangePaswordForm
 from django.contrib import messages
+from django.http import HttpResponse
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.auth.models import User
 from django.contrib.auth import login as auth_login,authenticate,logout as auth_logout
@@ -23,7 +24,7 @@ from django.db.models import Q
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import update_session_auth_hash
 from account.utils import create_action
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator ,EmptyPage, PageNotAnInteger
 
 def login(request):
 
@@ -134,7 +135,7 @@ class CustomResetPasswordView(PasswordResetView):
 
 @login_required
 def profile_view(request):
-    
+    bookmarks=Image.objects.filter(user=request.user).count()
     if request.method=='POST':
         u_form=UserUpdateForm(request.POST,instance=request.user)
         p_form=ProfileUpdateForm(request.POST,request.FILES,instance=request.user.profile)
@@ -154,7 +155,8 @@ def profile_view(request):
 
     context={
         'u_form':u_form,
-        'p_form':p_form
+        'p_form':p_form,
+        'bookmarks':bookmarks
     }
     return render(request,'account/profile.html',context)
 @login_required
@@ -187,13 +189,26 @@ def profile_update(request):
 
 @login_required
 def user_list(request):
-    users = User.objects.filter(is_active=True)
-    top_creators = User.objects.annotate(
-        total_images=Count('image_create')
-    ).order_by('-total_images')[:4]
-    return render(request, 'account/user/user_list.html', 
-                  {'section': 'people', 'users': users,'top_creators': top_creators})
+    users = User.objects.filter(is_active=True).order_by('-id')
+    paginator = Paginator(users, 12) # প্রতি পেজে ১২ জন
+    page = request.GET.get('page')
+    
+    try:
+        users = paginator.page(page)
+    except PageNotAnInteger:
+        users = paginator.page(1)
+    except EmptyPage:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return HttpResponse('') # AJAX এর জন্য খালি রেসপন্স
+        users = paginator.page(paginator.num_pages)
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'account/user/list_ajax.html', {'users': users})
+
+    return render(request, 'account/user/user_list.html', {
+        'users': users,
+        'top_creators': User.objects.annotate(total_images=Count('image_create')).order_by('-total_images')[:6]
+    })
 @login_required
 def user_detail(request, username):
     user = get_object_or_404(User, username=username, is_active=True)

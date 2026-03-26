@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load thumbnail %}
-
+{% load utils %}
 {% block title %}{{ user.get_full_name }} | Profile{% endblock %}
 
 {% block content %}
@@ -86,13 +86,16 @@
 
                 <div class="absolute inset-0 bg-gradient-to-t from-indigo-950/90 via-indigo-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
                     <div class="transform translate-y-8 group-hover:translate-y-0 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)">
-                        <h4 class="text-white font-black text-xl mb-3 tracking-tight">{{ image.title }}</h4>
+                        <h4 class="text-white font-black text-xl mb-3 tracking-tight"><a href="{{ image.get_absolute_url }}?source=feed">{{ image.title }}</a></h4>
                         <div class="flex items-center gap-5">
                             <span class="flex items-center gap-2 text-rose-300 text-[11px] font-black uppercase">
                                 <i class="fa-solid fa-heart shadow-sm"></i> {{ image.users_like.count|default:0 }}
                             </span>
                             <span class="flex items-center gap-2 text-indigo-200 text-[11px] font-black uppercase">
                                 <i class="fa-solid fa-comment shadow-sm"></i> {{ image.comments.count|default:0 }}
+                            </span>
+                             <span class="flex items-center gap-2 text-indigo-200 text-[11px] font-black uppercase">
+                                <i class="fa-solid fa-eye shadow-sm"></i>  {{ image.total_views |number_format}}
                             </span>
                         </div>
                     </div>

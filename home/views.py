@@ -15,16 +15,16 @@ r = redis.Redis(host=settings.REDIS_HOST,
 
 def home(request):
     images_list = Image.objects.annotate(
-        total_comments=Count('comments') # 'comments' হলো আপনার Comment মডেলের related_name
-    ).order_by('-created_at')# নতুন ছবি আগে দেখাবে
+        total_comments=Count('comments') 
+    ).order_by('-created_at')
     trending_ids = r.zrevrange('image_ranking', 0, 10)
     trending_ids = [int(id) for id in trending_ids]
     
-    # ২. ডাটাবেস থেকে ওই ইমেজগুলো আনা
+  
     
     trending_images = list(Image.objects.filter(id__in=trending_ids))
     trending_images.sort(key=lambda x: trending_ids.index(x.id))
-    # পেজিনেশন: প্রতি পেজে ৮টি করে ছবি
+   
     paginator = Paginator(images_list, 8) 
     page = request.GET.get('page')
     images_only = request.GET.get('images_only')
@@ -35,11 +35,11 @@ def home(request):
         images = paginator.page(1)
     except EmptyPage:
         if images_only:
-            return HttpResponse('') # AJAX এর জন্য খালি রেসপন্স
+            return HttpResponse('') 
         images = paginator.page(paginator.num_pages)
 
     if images_only:
-        # শুধুমাত্র ইমেজের অংশটুকু রিটার্ন করবে
+       
         return render(request, 'image/list_images_ajax.html', {'images': images})
     
     context = {

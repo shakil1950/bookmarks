@@ -46,11 +46,11 @@
                     <div class="space-y-5">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 font-bold">Bookmarks</span>
-                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black text-xs">124</span>
+                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black text-xs">{{bookmarks}}</span>
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 font-bold">Followers</span>
-                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-black text-xs">850</span>
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-black text-xs">{{ user.followers.count }}</span>
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600 font-bold">Logout</span>
-                            <a href=""><span class=" text-blue-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-solid fa-right-from-bracket"></i></span></a>
+                            <a href="{% url "logout" %}"><span class=" text-blue-600 px-3 py-1 rounded-lg font-black text-xs"><i class="fa-solid fa-right-from-bracket"></i></span></a>
                         </div>
                     </div>
                 </div>

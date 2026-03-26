@@ -118,35 +118,47 @@
 </style>
 
 <script>
-<script>
 document.addEventListener('DOMContentLoaded', (event) => {
-    // ইমেজ স্কেল ঠিক করার জন্য
+    
     const detailImg = document.querySelector('.md\\:w-2\\/3 img');
     if (detailImg) {
         detailImg.style.maxHeight = '70vh'; 
         detailImg.style.width = 'auto';
     }
 
-    // কমেন্ট সাবমিট লজিক
     const submitBtn = document.getElementById('submit-comment');
     if (submitBtn) {
         submitBtn.addEventListener('click', function() {
             const bodyField = document.getElementById('comment-body');
             const body = bodyField.value;
             const imageId = this.dataset.id;
+            
+           
             const url = '/image/comment/'; 
 
             if (body.trim() === '') return;
 
+          
+            let formData = new FormData();
+            formData.append('id', imageId);
+            formData.append('body', body);
+            
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
             fetch(url, {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'X-CSRFToken': Cookies.get('csrftoken'),
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `id=${imageId}&body=${body}`
+                    'X-Requested-With': 'XMLHttpRequest', 
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+             
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'ok') {
                     const commentList = document.getElementById('comment-list');
@@ -154,25 +166,36 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     if (noComments) noComments.remove();
 
                     const newComment = `
-                        <div class="flex gap-4 animate-fade-in">
+                        <div class="flex gap-4 animate-fade-in mb-4">
                             <img src="https://ui-avatars.com/api/?name=${data.user}&background=6366f1&color=fff" class="h-9 w-9 rounded-xl">
                             <div class="flex-1 bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100">
                                 <div class="flex justify-between items-center mb-1">
                                     <span class="font-bold text-gray-900 text-xs">@${data.user}</span>
                                     <span class="text-[9px] font-bold text-indigo-500 uppercase italic">Just Now</span>
                                 </div>
-                                <p class="text-gray-600 text-xs">${data.body}</p>
+                                <p class="text-gray-600 text-xs leading-relaxed">${data.body}</p>
                             </div>
                         </div>`;
                     
                     commentList.insertAdjacentHTML('afterbegin', newComment);
                     bodyField.value = '';
                     commentList.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                   
+                    const countBadge = document.querySelector('.fa-comments').parentElement.querySelector('span');
+                    if(countBadge) countBadge.innerText = parseInt(countBadge.innerText) + 1;
+
+                } else {
+                    alert('Error: ' + (data.message || 'Could not post comment.'));
                 }
+            })
+            .catch(error => {
+                console.error('Server Error:', error);
+               
+                alert('Something went wrong. Please check if you are logged in.');
             });
         });
     }
 });
-</script>
 </script>
 {% endblock %}

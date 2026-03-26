@@ -41,12 +41,12 @@ class Image(models.Model):
             super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        # এটি 'images:detail' নামে আপনার তৈরি করা URL-এ পাঠিয়ে দিবে
+        
         return reverse('detail', args=[self.id, self.slug])
     
     @property
     def total_views(self):
-        # রেডিস থেকে সরাসরি ভিউ সংখ্যা নিয়ে আসবে
+       
         v = r.get(f'image:{self.id}:views')
         return int(v) if v else 0
 

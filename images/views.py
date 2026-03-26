@@ -166,7 +166,33 @@ def delete_bookmark_image(request, id):
         messages.error(request, 'You are not authorized to delete this image.')
         return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-  
+
+
+@login_required
+def edit_image(request, id):
+    if request.method == 'POST':
+       
+        image = get_object_or_404(Image, id=id)
+        
+        if image.user != request.user and not request.user.is_superuser:
+            return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+            
+        title = request.POST.get('title')
+        description = request.POST.get('description') 
+        
+        if title:
+            image.title = title
+            image.description = description
+            image.save()
+            return JsonResponse({
+                'status': 'ok', 
+                'new_title': image.title, 
+                'new_description': image.description
+            })
+        
+        return JsonResponse({'status': 'error', 'message': 'Title missing'}, status=400)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=405)
     
     
     

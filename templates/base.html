@@ -14,18 +14,18 @@
     <script src="{% static 'js/sweetalert.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+   
     <script>
         const csrftoken = Cookies.get('csrftoken');
 
         document.addEventListener('DOMContentLoaded', (event) => {
-            // ১. লাইক লজিক (Login Check সহ)
+            
             document.addEventListener('click', function(e) {
                 const likeButton = e.target.closest('a.like');
                 if (likeButton) {
                     e.preventDefault();
 
-                    // ইউজার লগইন করা আছে কি না চেক (Django Template variable ব্যবহার করে)
+                    
                     const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
 
                     if (!isAuthenticated) {
@@ -59,10 +59,10 @@
                                 closeButton: 'border-none focus:outline-none'
                             }
                         });
-                        return; // সার্ভারে রিকোয়েস্ট পাঠাবে না
+                        return; 
                     }
 
-                    // লগইন থাকলে আগের মতো লাইক কাজ করবে
+                   
                     const url = '{% url "like" %}';
                     var formData = new FormData();
                     formData.append('id', likeButton.dataset.id);
@@ -100,7 +100,7 @@
                 }
             });
 
-            // ২. Infinite Scroll লজিক (আগের মতোই থাকবে)
+        
             let page = 1;
             let emptyPage = false;
             let blockRequest = false;
