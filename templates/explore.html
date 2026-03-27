@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load utils %}
+{% block title %}Explore | Discover Inspiration{% endblock %}
+
+{% block content %}
+
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-gray-100 pb-8">
+        <div>
+            <h2 class="text-4xl font-black text-gray-900">Explore Feed</h2>
+            <p class="text-gray-400 mt-2 font-medium italic">Discover what others are sharing...</p>
+        </div>
+        <div class="flex gap-4 mt-6 md:mt-0">
+             <a href="#" class="px-6 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm">All</a>
+             <a href="{% url "ranking" %}" class="px-6 py-2 rounded-xl bg-white border border-gray-100 text-gray-600 font-bold text-sm hover:shadow-lg transition">Popular</a>
+        </div>
+    </div>
+    
+    <div class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6" id="image-list">
+        {% include "image/list_images_ajax.html" %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  var swiper = new Swiper(".mySwiper", {
+    effect: "cards",
+    grabCursor: true,
+    loop: true,
+    autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+    },
+    rotate: true,
+    mousewheel: {
+        invert: false,
+    },
+  });
+</script>
+
+<style>
+    .swiper { width: 100%; max-width: 400px; padding: 20px; }
+    .swiper-slide { background-position: center; background-size: cover; border-radius: 2rem; }
+    html {
+        scroll-behavior: smooth;
+    }
+
+   
+    /* Smooth floating animation */
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    .floating-card { animation: floating 3s ease-in-out infinite; }
+</style>
+{% endblock %}

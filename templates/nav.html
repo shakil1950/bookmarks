@@ -1,5 +1,5 @@
 <nav class="bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50 transition-all duration-300" 
-     x-data="{ mobileMenuOpen: false, ...notificationHandler() }">
+     x-data="{ mobileMenuOpen: false, userMenuOpen: false, ...notificationHandler() }">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             
@@ -21,8 +21,12 @@
                         Dashboard
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
                     </a>
+                     <a href="{% url "explore" %}" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
+                        Explore
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
+                    </a>
                     <a href="{% url 'image_create' %}" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
-                        Images
+                        Upload
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300 group-hover/link:w-full"></span>
                     </a>
                     <a href="{% url 'user_list' %}" class="relative px-4 py-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-all group/link">
@@ -48,19 +52,16 @@
                             </template>
                         </button>
 
-                        <div x-show="open" 
-                             x-cloak
+                        <div x-show="open" x-cloak
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
                              class="absolute right-0 mt-4 w-80 bg-white rounded-[2rem] shadow-2xl border border-gray-100 py-4 z-[100]">
-                            
                             <div class="px-6 py-2 border-b border-gray-50 flex justify-between items-center mb-2">
                                 <h3 class="text-sm font-black text-gray-900">Notifications</h3>
                                 <span class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg uppercase" x-text="unreadCount + ' New'"></span>
                             </div>
-
-                            <div class="max-h-80 overflow-y-auto custom-scrollbar px-2">
+                            <div class="max-h-80 overflow-y-auto px-2">
                                 <template x-if="items.length === 0">
                                     <div class="p-6 text-center text-gray-400 text-xs font-bold">No new notifications</div>
                                 </template>
@@ -80,19 +81,28 @@
                         </div>
                     </div>
 
-                    <div class="hidden md:flex items-center gap-3 bg-gray-50/50 p-1 pr-4 rounded-full border border-gray-100 ml-2">
-                        <a href="{% url 'profile_view' %}" class="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-sm hover:scale-105 transition-transform">
-                            {% if request.user.profile.avater %}
-                                <img src="{{ request.user.profile.avater.url }}" class="w-full h-full object-cover">
-                            {% else %}
-                                <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
-                            {% endif %}
-                        </a>
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-gray-900 lowercase leading-none">@{{ request.user.username }}</span>
-                            <form action="{% url 'logout' %}" method="post">
+                    <div class="hidden md:flex items-center gap-3 bg-gray-50/50 p-1 pr-4 rounded-full border border-gray-100 ml-2 relative" @click.away="userMenuOpen = false">
+                        <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-sm hover:scale-105 transition-transform">
+                                {% if request.user.profile.avater %}
+                                    <img src="{{ request.user.profile.avater.url }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <img src="https://ui-avatars.com/api/?name={{ request.user.username }}&background=6366f1&color=fff" class="w-full h-full object-cover">
+                                {% endif %}
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <span class="text-[10px] font-black text-gray-900 lowercase leading-none">@{{ request.user.username }}</span>
+                                <span class="text-[8px] font-bold uppercase text-indigo-500">View Profile</span>
+                            </div>
+                        </button>
+                        
+                        <div x-show="userMenuOpen" x-cloak
+                             class="absolute top-full right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-[100]">
+                            <a href="{% url 'profile_view' %}" class="block px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">My Profile</a>
+                            <hr class="my-1 border-gray-50">
+                            <form action="{% url 'logout' %}" method="post" class="w-full">
                                 {% csrf_token %}
-                                <button type="submit" class="text-[8px] font-black uppercase text-red-400 hover:text-red-600 tracking-tighter">Logout</button>
+                                <button type="submit" class="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50">Logout</button>
                             </form>
                         </div>
                     </div>
@@ -102,19 +112,41 @@
                 {% endif %}
 
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2.5 rounded-xl text-gray-500 hover:bg-gray-50 transition-all">
-                    <svg class="w-6 h-6" x-show="!mobileMenuOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    <svg class="w-6 h-6" x-show="mobileMenuOpen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <svg class="w-6 h-6" x-show="!mobileMenuOpen" x-cloak fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <svg class="w-6 h-6" x-show="mobileMenuOpen" x-cloak fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
         </div>
     </div>
+
+    <div x-show="mobileMenuOpen" x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="md:hidden bg-white border-b border-gray-100 pb-6 px-4 space-y-2">
+        
+        <a href="{% url 'dashboard' %}" class="block px-4 py-3 text-sm font-bold text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all">Dashboard</a>
+        <a href="{% url 'image_create' %}" class="block px-4 py-3 text-sm font-bold text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all">Images</a>
+        <a href="{% url 'user_list' %}" class="block px-4 py-3 text-sm font-bold text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all">People</a>
+        
+        <hr class="border-gray-50 my-2">
+        
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'profile_view' %}" class="block px-4 py-3 text-sm font-bold text-gray-600">My Profile (@{{ request.user.username }})</a>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-left px-4 py-3 text-sm font-bold text-red-500">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="block px-4 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 rounded-xl">Log in</a>
+            <a href="{% url 'registration' %}" class="block px-4 py-3 text-sm font-bold bg-gray-900 text-white text-center rounded-xl">Join Now</a>
+        {% endif %}
+    </div>
 </nav>
 
 <style>
-    /* এটা অবশ্যই হেডারের ভেতর বা স্টাইল শিটে থাকতে হবে */
     [x-cloak] { display: none !important; }
 </style>
-
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('notificationHandler', () => ({

@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="{% static 'js/sweetalert.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
@@ -21,16 +20,13 @@
         document.addEventListener('DOMContentLoaded', (event) => {
             
             document.addEventListener('click', function(e) {
-                const likeButton = e.target.closest('a.like');
-                if (likeButton) {
-                    e.preventDefault();
+            const likeButton = e.target.closest('a.like');
+            if (likeButton) {
+                e.preventDefault();
 
-                    
-                    const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
-
-                    if (!isAuthenticated) {
-                        // লগইন না থাকলে Pexels এর মতো Popup দেখাবে
-                        Swal.fire({
+                const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+                if (!isAuthenticated) {
+                    Swal.fire({
                             title: '<span class="text-2xl font-black">Join Bookmarks</span>',
                             html: `
                                 <div class="text-left mt-4">
@@ -59,47 +55,50 @@
                                 closeButton: 'border-none focus:outline-none'
                             }
                         });
-                        return; 
-                    }
-
-                   
-                    const url = '{% url "like" %}';
-                    var formData = new FormData();
-                    formData.append('id', likeButton.dataset.id);
-                    formData.append('action', likeButton.dataset.action);
-
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {'X-CSRFToken': csrftoken},
-                        body: formData,
-                        mode: 'same-origin'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data['status'] === 'ok') {
-                            var previousAction = likeButton.dataset.action;
-                            var action = previousAction === 'like' ? 'unlike' : 'like';
-                            likeButton.dataset.action = action;
-                            var icon = likeButton.querySelector('svg');
-                            
-                            if (action === 'unlike') {
-                                icon.classList.add('text-red-500');
-                                likeButton.classList.add('bg-white');
-                            } else {
-                                icon.classList.remove('text-red-500');
-                                likeButton.classList.remove('bg-white');
-                            }
-
-                            var countSpan = likeButton.closest('.group').querySelector('span.total');
-                            if (countSpan) {
-                                var totalLikes = parseInt(countSpan.innerHTML);
-                                countSpan.innerHTML = previousAction === 'like' ? totalLikes + 1 : totalLikes - 1;
-                            }
-                        }
-                    });
+                    return; 
                 }
-            });
 
+                const url = '{% url "like" %}';
+                const imageId = likeButton.dataset.id;
+                const action = likeButton.dataset.action;
+
+                var formData = new FormData();
+                formData.append('id', imageId);
+                formData.append('action', action);
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrftoken},
+                    body: formData,
+                    mode: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data['status'] === 'ok') {
+                        
+                        const previousAction = action;
+                        const nextAction = previousAction === 'like' ? 'unlike' : 'like';
+                        likeButton.dataset.action = nextAction;
+
+                        
+                        if (previousAction === 'like') {
+                            likeButton.classList.remove('bg-black/20', 'text-white');
+                            likeButton.classList.add('bg-white', 'text-red-500');
+                        } else {
+                            likeButton.classList.remove('bg-white', 'text-red-500');
+                            likeButton.classList.add('bg-black/20', 'text-white');
+                        }
+
+                        
+                        const countSpans = document.querySelectorAll('.like-count-' + imageId);
+                        countSpans.forEach(span => {
+                            let totalLikes = parseInt(span.innerText.replace(/,/g, '')) || 0;
+                            span.innerText = previousAction === 'like' ? (totalLikes + 1) : (totalLikes - 1);
+                        });
+                    }
+                });
+            }
+        });
         
             let page = 1;
             let emptyPage = false;
@@ -136,7 +135,7 @@
     <div id="content">
         {% block content %}{% endblock %}
     </div>
-
+    {% include "footer.html" %}
     {% if messages %}
     <script>
         {% for message in messages %}

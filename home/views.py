@@ -13,7 +13,18 @@ r = redis.Redis(host=settings.REDIS_HOST,
                 port=settings.REDIS_PORT,
                 db=settings.REDIS_DB)
 
+
 def home(request):
+  
+    trending_images = Image.objects.annotate(
+        like_count=Count('users_like')
+    ).select_related('user').order_by('-like_count')[:10]
+    
+    return render(request, 'home.html', {
+        'trending_images': trending_images,
+    })
+@login_required
+def explore(request):
     images_list = Image.objects.annotate(
         total_comments=Count('comments') 
     ).order_by('-created_at')
@@ -48,7 +59,7 @@ def home(request):
         'trending_images':trending_images,
         
     }
-    return render(request, 'home.html', context)
+    return render(request, 'explore.html', context)
 
 
 @login_required

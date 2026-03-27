@@ -1,0 +1,45 @@
+<footer class="bg-white border-t border-gray-100 pt-20 pb-10 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                
+                <div class="space-y-6">
+                    <a href="/" class="text-2xl font-black tracking-tighter text-gray-900">
+                        BOOK<span class="text-rose-500">MARK</span>
+                    </a>
+                    <p class="text-gray-500 font-medium leading-relaxed">
+                        Your personal visual diary. Capture and organize your favorite moments with ease.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-gray-900 font-black uppercase tracking-widest text-xs mb-6">Explore</h4>
+                    <ul class="space-y-4 text-gray-500 font-bold">
+                        <li><a href="{% url 'explore' %}" class="hover:text-rose-500 transition-all">Explore</a></li>
+                        <li><a href="{% url "ranking" %}" class="hover:text-rose-500 transition-all">Popular</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-gray-900 font-black uppercase tracking-widest text-xs mb-6">Support</h4>
+                    <ul class="space-y-4 text-gray-500 font-bold">
+                        <li><a href="#" class="hover:text-rose-500 transition-all">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-rose-500 transition-all">Terms of Use</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-gray-900 font-black uppercase tracking-widest text-xs mb-6">Newsletter</h4>
+                    <div class="flex flex-col gap-3">
+                        <input type="email" placeholder="Your email" class="w-full py-3 px-4 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-rose-500/20 font-bold text-sm">
+                        <button class="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-rose-500 transition-all">Join Bookmark</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-gray-50 text-center">
+                <p class="text-gray-400 text-sm font-bold">
+                    &copy; 2026 Bookmark. Crafted by <span class="text-gray-900">Bookmarks</span>.
+                </p>
+            </div>
+        </div>
+    </footer>
