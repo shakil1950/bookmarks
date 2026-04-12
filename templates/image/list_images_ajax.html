@@ -11,17 +11,17 @@
             
             <div class="absolute inset-0 bg-gradient-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
                 
-                <div class="absolute top-4 right-4 flex flex-col gap-2 translate-y-[-10px] group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                <div class="absolute top-4 right-4 flex flex-col gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:translate-y-[-10px] md:group-hover:translate-y-0 transition-all duration-300 z-30">
                     
                   <a href="#" 
                     data-id="{{ image.id }}" 
                     data-action="{% if request.user in users_like %}unlike{% else %}like{% endif %}"
                     class="like button image-like-btn flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-xl border border-white/30 
-                        {% if request.user in users_like %}bg-white text-red-500{% else %}bg-black/20 backdrop-blur-md text-white hover:bg-red-500{% endif %}">
+                        {% if request.user in users_like %}bg-white text-red-500{% else %}bg-black/40 backdrop-blur-md text-white hover:bg-red-500{% endif %}">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                         </svg>
-                 </a>
+                  </a>
 
                     {% if image.user == request.user or request.user.is_superuser %}
                         <div x-data="{}">
@@ -50,14 +50,14 @@
                                         });
                                     }
                                 })" 
-                                class="flex items-center justify-center w-10 h-10 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-red-600 transition-all shadow-xl border border-white/30">
+                                class="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-red-600 transition-all shadow-xl border border-white/30">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                             </button>
                         </div>
 
-                       <div class="edit-container">
+                        <div class="edit-container">
                             <button type="button" 
                                     onclick="event.preventDefault(); event.stopPropagation(); openMyModal('{{ image.id }}')" 
                                     class="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-xl text-white hover:bg-indigo-600 transition-all shadow-2xl border border-white/30 group">
@@ -101,18 +101,17 @@
                         <div class="flex items-center gap-4 text-white/90 text-sm font-bold">
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                                <span>{{ image.total_comments|number_format }}</span>
+                                <span>{{ image.total_comments }}</span>
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                                <span class="like-count-{{ image.id }}">{{ total_likes|number_format }}</span>
+                                <span class="like-count-{{ image.id }}">{{ total_likes }}</span>
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="p-5 bg-white md:hidden">
             <div class="flex items-center justify-between mb-3">
                 <span id="mobile-title-{{ image.id }}" class="font-black text-gray-900 uppercase text-xs tracking-widest">{{ image.title }}</span>
@@ -122,11 +121,11 @@
                 <div class="flex items-center gap-4 text-gray-500 text-sm font-bold">
                     <span class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        <span>{{ image.total_comments|number_format }}</span>
+                        <span>{{ image.total_comments }}</span>
                     </span>
                     <span class="flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                        <span class="like-count-{{ image.id }}">{{ total_likes|number_format }}</span>
+                        <span class="like-count-{{ image.id }}">{{ total_likes }}</span>
                     </span>
                 </div>
             </div>

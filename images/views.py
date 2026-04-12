@@ -70,7 +70,7 @@ r = redis.Redis(host=settings.REDIS_HOST,
                 db=settings.REDIS_DB)
 
 
-
+@login_required
 def image_detail(request, id, slug):
    
     image = get_object_or_404(Image, id=id, slug=slug)
@@ -81,11 +81,22 @@ def image_detail(request, id, slug):
    
     if not back_url:
         back_url = '/'
+    user_images = Image.objects.filter(user=image.user).exclude(id=image.id)[:6]
     return render(request, 'image/detail.html', {
         'section': 'images',
         'image': image,
         'back_url':back_url,
-        'total_views': total_views
+        'total_views': total_views,
+        'user_images': user_images,
+    })
+
+@login_required
+def user_posts(request, username):
+    
+    user_images = Image.objects.filter(user__username=username).order_by('created_at')
+    return render(request, 'image/user_posts.html', {
+        'username': username,
+        'user_images': user_images
     })
 
 @login_required

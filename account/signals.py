@@ -20,19 +20,19 @@ def save_profile(sender, instance, **kwargs):
 
 @receiver(post_save, sender=SocialAccount)
 def save_google_avatar(sender, instance, created, **kwargs):
-    # যদি নতুন সোশ্যাল অ্যাকাউন্ট তৈরি হয় এবং সেটি গুগল হয়
+   
     if created and instance.provider == 'google':
         avater_url = instance.extra_data.get('picture')
         
         if avater_url:
-            # গুগল থেকে ইমেজ ডাটা নিয়ে আসা
+         
             response = requests.get(avater_url)
             if response.status_code == 200:
-                # ইউজারের প্রোফাইল খুঁজে বের করা (অথবা তৈরি করা)
+                
                 profile, _ = Profile.objects.get_or_create(user=instance.user)
                 
-                # ইমেজের নাম তৈরি করা (যেমন: user_1_avatar.jpg)
+             
                 file_name = f'user_{instance.user.id}_avatar.jpg'
                 
-                # প্রোফাইল মডেলে ছবি সেভ করা
+              
                 profile.avater.save(file_name, ContentFile(response.content), save=True)

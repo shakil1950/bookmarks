@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-2xl font-black mb-8">All Stories by @{{ username }}</h2>
+    <div class="columns-1 md:columns-3 gap-6">
+        {% for img in user_images %}
+            <div class="mb-6">
+                <a href="{{ img.get_absolute_url }}">
+                    <img src="{{ img.image.url }}" class="rounded-2xl shadow-sm hover:shadow-xl transition-all">
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

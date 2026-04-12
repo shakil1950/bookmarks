@@ -46,7 +46,7 @@ class UserUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_tag = False # ফরম ট্যাগ টেমপ্লেটে আছে তাই এখানে False
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Row(
                 Column(Field('username', placeholder="Username", css_class="mb-0"), css_class='form-group col-md-6 mb-0'),
@@ -57,7 +57,7 @@ class UserUpdateForm(forms.ModelForm):
                 Column(Field('email', placeholder="Email"), css_class='form-group col-md-6 mb-0'),
             ),
         )
-        # হেল্প টেক্সট বন্ধ করার জন্য
+       
         self.fields['username'].help_text = None
 
     def clean_email(self):

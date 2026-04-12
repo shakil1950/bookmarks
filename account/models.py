@@ -4,7 +4,7 @@ from django.db.models import UniqueConstraint
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-# Create your models here.
+
 
 GENDER={
     ('male','Male'),
@@ -12,8 +12,7 @@ GENDER={
     ('other','Other'),
 }
 def user_directory_path(instance, filename):
-    # ফাইলটি 'user_<username>/<filename>' এই ফরম্যাটে সেভ হবে
-    # উদাহরণ: user_shuvo/my_photo.jpg
+  
     return 'profile_pics/user_{0}/{1}'.format(instance.user.username, filename)
 
 class Profile(models.Model):
