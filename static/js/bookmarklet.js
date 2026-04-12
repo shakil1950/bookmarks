@@ -1,5 +1,4 @@
-alert('something')
-console.log('working')
+alert('Select image')
 const siteUrl = 'http://127.0.0.1:8000/';
 const styleUrl = siteUrl + 'static/css/bookmarklet.css';
 const minWidth = 100;

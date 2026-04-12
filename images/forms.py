@@ -22,4 +22,9 @@ class ImageCreateForm(forms.ModelForm):
         #     'The given URL does not match valid image extensions.')
         return url
     
+class ImageUploadForm(forms.ModelForm):
+    class Meta:
+        model = Image
+        fields = ['title', 'image']
+    
     

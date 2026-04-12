@@ -4,16 +4,23 @@
 
 {% block content %}
 
-
 <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-gray-100 pb-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-gray-100 pb-8 gap-6">
         <div>
-            <h2 class="text-4xl font-black text-gray-900">Explore Feed</h2>
+            <h2 class="text-4xl font-black text-gray-900 tracking-tighter">Explore Feed</h2>
             <p class="text-gray-400 mt-2 font-medium italic">Discover what others are sharing...</p>
         </div>
-        <div class="flex gap-4 mt-6 md:mt-0">
-             <a href="#" class="px-6 py-2 rounded-xl bg-indigo-600 text-white font-bold text-sm">All</a>
-             <a href="{% url "ranking" %}" class="px-6 py-2 rounded-xl bg-white border border-gray-100 text-gray-600 font-bold text-sm hover:shadow-lg transition">Popular</a>
+        
+        <div class="flex flex-wrap items-center gap-4">
+             <button onclick="toggleUploadModal()" class="px-8 py-3 rounded-2xl bg-rose-600 text-white font-black text-sm shadow-xl shadow-rose-200 hover:-translate-y-1 hover:bg-rose-700 transition-all flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                Post Inspiration
+             </button>
+
+             <div class="h-8 w-[1px] bg-gray-200 mx-2 hidden md:block"></div>
+
+             <a href="#" class="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm">All</a>
+             <a href="{% url "ranking" %}" class="px-6 py-3 rounded-xl bg-white border border-gray-100 text-gray-600 font-bold text-sm hover:shadow-lg transition">Popular</a>
         </div>
     </div>
     
@@ -22,37 +29,131 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<div id="uploadModal" class="hidden fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="toggleUploadModal()"></div>
+
+    <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-[3rem] bg-white p-8 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-3xl font-black text-gray-900 tracking-tighter" id="modal-title">Share Image</h3>
+                <button onclick="toggleUploadModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form action="{% url 'image_upload' %}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-gray-700 ml-1">Give it a title</label>
+                    <input type="text" name="title" required placeholder="Ex: Minimalist Desktop Setup" 
+                    class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-rose-500 outline-none font-medium">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-gray-700 ml-1">Upload File</label>
+                    <div class="relative border-2 border-dashed border-gray-200 rounded-[2rem] p-10 text-center hover:border-rose-400 hover:bg-rose-50 transition-all group">
+                        <input type="file" name="image" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div class="space-y-2">
+                            <svg class="w-12 h-12 text-gray-300 mx-auto group-hover:text-rose-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <p class="text-gray-400 font-bold text-sm">Drag your image here or <span class="text-rose-600">Browse</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-xl shadow-xl hover:bg-rose-600 transition-all duration-300 mt-4">
+                    Publish to Explore ✨
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-  var swiper = new Swiper(".mySwiper", {
-    effect: "cards",
-    grabCursor: true,
-    loop: true,
-    autoplay: {
-        delay: 3000,
-        disableOnInteraction: false,
-    },
-    rotate: true,
-    mousewheel: {
-        invert: false,
-    },
-  });
+ 
+function openMyModal(id) {
+    const modal = document.getElementById(`modal-${id}`);
+    if (modal) {
+       
+        document.body.appendChild(modal); 
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden'; 
+    }
+}
+
+function closeMyModal(id) {
+    const modal = document.getElementById(`modal-${id}`);
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto'; 
+    }
+}
+
+function submitEdit(id) {
+    const title = document.getElementById(`input-title-${id}`).value;
+    const description = document.getElementById(`input-desc-${id}`).value;
+    
+    
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+
+    fetch(`/image/edit/${id}/`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            
+            const titleElem = document.getElementById(`title-${id}`);
+            const descElem = document.getElementById(`desc-${id}`);
+            if(titleElem) titleElem.innerText = title;
+            if(descElem) descElem.innerText = description;
+            
+            closeMyModal(id);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+ 
+    function toggleUploadModal() {
+        const modal = document.getElementById('uploadModal');
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            document.body.style.overflow = 'hidden'; 
+        } else {
+            document.body.style.overflow = 'auto'; 
+        }
+    }
+
+    // Swiper script (আগেরটা)
+    var swiper = new Swiper(".mySwiper", {
+        effect: "cards",
+        grabCursor: true,
+        loop: true,
+        autoplay: { delay: 3000, disableOnInteraction: false },
+        rotate: true,
+    });
+
 </script>
 
 <style>
+    
+    #image-list > div {
+        break-inside: avoid;
+        margin-bottom: 1.5rem;
+    }
+    
     .swiper { width: 100%; max-width: 400px; padding: 20px; }
     .swiper-slide { background-position: center; background-size: cover; border-radius: 2rem; }
-    html {
-        scroll-behavior: smooth;
-    }
-
-   
-    /* Smooth floating animation */
-    @keyframes floating {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-    }
-    .floating-card { animation: floating 3s ease-in-out infinite; }
+    html { scroll-behavior: smooth; }
 </style>
 {% endblock %}

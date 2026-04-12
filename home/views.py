@@ -7,7 +7,9 @@ from django.db.models import Count
 from account.models import Action
 from django.http import JsonResponse
 import redis
+from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 # Create your views here.
 r = redis.Redis(host=settings.REDIS_HOST,
                 port=settings.REDIS_PORT,
@@ -15,14 +17,25 @@ r = redis.Redis(host=settings.REDIS_HOST,
 
 
 def home(request):
-  
+    total_bookmark=Image.objects.all().count()
+    today_bookmark=Image.objects.filter(created_at__date=timezone.now().date()).count()
+    user=User.objects.filter(is_active=True)
+    active_user=user.count()
+    user_onboard_today=user.filter(date_joined=timezone.now().date()).count()
+   
     trending_images = Image.objects.annotate(
         like_count=Count('users_like')
     ).select_related('user').order_by('-like_count')[:10]
-    
-    return render(request, 'home.html', {
+    context={
         'trending_images': trending_images,
-    })
+        'total_bookmark':total_bookmark,
+        'today_bookmark':today_bookmark,
+        'active_user':active_user,
+        'user':user,
+        'user_onboard_today':user_onboard_today
+    }
+    return render(request, 'home.html',context)
+
 @login_required
 def explore(request):
     images_list = Image.objects.annotate(
@@ -122,3 +135,4 @@ def dashboard(request):
         'images': user_images,
         'images_feed': images_feed,
     })
+

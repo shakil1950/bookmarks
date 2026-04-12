@@ -8,9 +8,14 @@ from django.conf import settings
 r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
 from django.utils.text import slugify
 def user_directory_path(instance, filename):
-    # ফাইলটি 'user_<id>/<filename>' এই ফরম্যাটে আপলোড হবে
-    # উদাহরণ: user_shakil/my_photo.jpg
+    
     return 'user_{0}/{1}'.format(instance.user.username, filename)
+
+UPLOAD_CHOICES = [
+        ('bookmark', 'Bookmarked from Web'),
+        ('manual', 'Uploaded by User'),
+    ]
+
 class Image(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='image_create')
     title=models.CharField(max_length=200)
@@ -24,7 +29,7 @@ class Image(models.Model):
         related_name='images_liked',
         blank=True
         )
-
+    upload_type = models.CharField(max_length=10, choices=UPLOAD_CHOICES, default='bookmark')
     class Meta:
         
         indexes = [
@@ -38,7 +43,7 @@ class Image(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         

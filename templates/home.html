@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load utils %}
 {% block content %}
 <div class="relative overflow-hidden bg-[#fffaf0] pt-16 pb-32">
     <div class="absolute top-0 -left-20 w-[500px] h-[500px] bg-rose-100 rounded-full blur-[150px] opacity-40"></div>
@@ -30,10 +30,11 @@
                         Start Collecting — It's Free
                     </a>
                     <div class="flex -space-x-4">
-                        <img class="w-12 h-12 rounded-full border-4 border-white" src="https://i.pravatar.cc/100?u=1" alt="">
-                        <img class="w-12 h-12 rounded-full border-4 border-white" src="https://i.pravatar.cc/100?u=2" alt="">
-                        <img class="w-12 h-12 rounded-full border-4 border-white" src="https://i.pravatar.cc/100?u=3" alt="">
-                        <div class="w-12 h-12 rounded-full border-4 border-white bg-rose-500 flex items-center justify-center text-white text-xs font-bold">+2k</div>
+                        {% for user in user|slice:"3" %}
+                        <img class="w-12 h-12 rounded-full border-4 border-white" src="{{user.profile.avater.url}}" alt="">
+                        {% endfor %}
+                       
+                        <div class="w-12 h-12 rounded-full border-4 border-white bg-rose-500 flex items-center justify-center text-white text-xs font-bold">{{active_user|number_format}}+</div>
                     </div>
                 </div>
             </div>
@@ -62,10 +63,10 @@
 <div class="bg-white py-20 border-y border-gray-100">
     <div class="max-w-7xl mx-auto px-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-            <div><p class="text-5xl font-black text-gray-900 mb-2">500k+</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Images Bookmarked</p></div>
-            <div><p class="text-5xl font-black text-rose-500 mb-2">12k+</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Daily Creators</p></div>
-            <div><p class="text-5xl font-black text-indigo-600 mb-2">99%</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">User Satisfaction</p></div>
-            <div><p class="text-5xl font-black text-gray-900 mb-2">24/7</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Creative Support</p></div>
+            <div><p class="text-5xl font-black text-gray-900 mb-2">{{total_bookmark|number_format}}</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Total Bookmarked</p></div>
+            <div><p class="text-5xl font-black text-rose-500 mb-2">{{today_bookmark|number_format}}</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Today Bookmarked</p></div>
+            <div><p class="text-5xl font-black text-indigo-600 mb-2">{{active_user|number_format}}</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Active User</p></div>
+            <div><p class="text-5xl font-black text-gray-900 mb-2">{{user_onboard_today|number_format}}</p><p class="text-gray-400 font-bold uppercase tracking-widest text-xs">Today Onboard</p></div>
         </div>
     </div>
 </div>
@@ -109,9 +110,16 @@
         <div class="relative z-10 space-y-8">
             <h2 class="text-5xl md:text-7xl font-black text-white tracking-tighter">Ready to start <br>your diary?</h2>
             <p class="text-white/80 text-xl font-bold">Join 12,000+ creators and start your journey today.</p>
+            {% if not request.user.is_authenticated %}
             <a href="{% url 'registration' %}" class="inline-block px-12 py-6 bg-white text-gray-900 rounded-full font-black text-2xl hover:scale-110 transition-transform">
                 Get Started Now — It's Free
             </a>
+             
+            {% else %}
+            <a href="{% url 'explore' %}" class="inline-block px-12 py-6 bg-white text-gray-900 rounded-full font-black text-2xl hover:scale-110 transition-transform">
+                Get Started Now — It's Free
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -158,11 +166,7 @@
                 <div class="lg:w-2/5 flex flex-col items-center justify-center space-y-8 bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-100">
                     <div class="text-center">
                         <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Drag this button 👇</p>
-                        <a href="javascript:(function(){
-                            var script = document.createElement('script');
-                            script.src = 'https://{{ request.get_host }}/static/js/bookmarklet.js?r=' + Math.random();
-                            document.body.appendChild(script);
-                        })();" 
+                        <a href="javascript:{% include 'image/bookmarklet_launcher.js' %}"
                         class="inline-block px-10 py-5 bg-gradient-to-r from-indigo-600 to-rose-500 text-white font-black text-xl rounded-2xl shadow-[0_20px_40px_rgba(79,70,229,0.3)] cursor-move hover:scale-105 active:scale-95 transition-all">
                             🔖 Drag to Bookmarks
                         </a>
@@ -182,7 +186,9 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
 <script>
+    
     var swiper = new Swiper(".mySwiper", {
         effect: "cards",
         grabCursor: true,

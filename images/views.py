@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from .forms import ImageCreateForm
+from .forms import ImageCreateForm,ImageUploadForm
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
 from .models import Image,Comment
@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from account.utils import create_action
 import redis
+from django.db import transaction
 from django.conf import settings
 
 
@@ -22,31 +23,36 @@ def image_create(request):
         if form.is_valid():
             cd = form.cleaned_data
             new_image = form.save(commit=False)
-            
-            # ১. আগে ইউজার সেট করুন (যাতে ডাটাবেস এরর না দেয়)
             new_image.user = request.user
-            
-            # ২. ইমেজ ডাউনলোড লজিক
+            new_image.upload_type = 'bookmark'
             image_url = cd['url']
             name = slugify(new_image.title)
             extension = image_url.rsplit('.', 1)[1].lower()
             image_name = f'{name}.{extension}'
-            
             response = requests.get(image_url)
-            # ৩. ইমেজটি ফাইলে সেভ করুন (save=False মানে এখনো ডাটাবেসে যাবে না)
             new_image.image.save(image_name, ContentFile(response.content), save=False)
-            
-            # ৪. এবার ফাইনালি সব ডাটা একসাথে সেভ করুন
             new_image.save()
             new_image = form.save()
             create_action(request.user, 'bookmarked image', new_image)
             messages.success(request, 'Image added successfully')
-            return redirect('dashboard') # বা আপনার ইচ্ছেমতো পেজ
+            return redirect('explore') 
     else:
         form = ImageCreateForm(data=request.GET)
     
     return render(request, 'image/create.html', {'form': form})
 
+
+@login_required
+def image_upload(request):
+    if request.method == 'POST':
+        form = ImageUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_image = form.save(commit=False)
+            new_image.user = request.user
+            new_image.upload_type = 'manual' 
+            new_image.save()
+            return redirect('explore') 
+    return redirect('explore')
 
 @login_required
 def list_image(request):
@@ -171,28 +177,42 @@ def delete_bookmark_image(request, id):
 @login_required
 def edit_image(request, id):
     if request.method == 'POST':
-       
+        # ১. অবজেক্ট খুঁজে বের করা
         image = get_object_or_404(Image, id=id)
         
+        # ২. পারমিশন চেক (নিশ্চিত করুন ইউজার লগইন করা আছে)
         if image.user != request.user and not request.user.is_superuser:
             return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
             
-        title = request.POST.get('title')
-        description = request.POST.get('description') 
+        # ৩. ডাটা রিসিভ করা (strip() ব্যবহার করা ভালো)
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
         
+        print(f'>>> Attempting Save: ID={id}, Title={title}')
+
         if title:
-            image.title = title
-            image.description = description
-            image.save()
-            return JsonResponse({
-                'status': 'ok', 
-                'new_title': image.title, 
-                'new_description': image.description
-            })
+            try:
+                # ৪. অ্যাটমিক ট্রানজ্যাকশন ব্যবহার করা সেভ নিশ্চিত করতে
+                with transaction.atomic():
+                    image.title = title
+                    image.description = description if description else None
+                    image.save()
+                
+                # ৫. কনফার্মেশনের জন্য আবার ডাটাবেস থেকে রিড করা
+                image.refresh_from_db()
+                print(f'>>> Saved Successfully: {image.title}')
+
+                return JsonResponse({
+                    'status': 'ok', 
+                    'new_title': image.title, 
+                    'new_description': image.description or ''
+                })
+            except Exception as e:
+                print(f'>>> Save Error: {str(e)}')
+                return JsonResponse({'status': 'error', 'message': 'Database error'}, status=500)
         
-        return JsonResponse({'status': 'error', 'message': 'Title missing'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'Title is required'}, status=400)
     
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=405)
-    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
     
     

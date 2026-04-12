@@ -11,5 +11,6 @@ urlpatterns = [
     path('ranking/', views.image_ranking, name='ranking'),
     path('delete/<int:id>/', views.delete_bookmark_image, name='delete_bookmark_image'),
     path('edit/<int:id>/', views.edit_image, name='edit_image'),
+    path('image_upload/',views.image_upload,name='image_upload')
 ]
 

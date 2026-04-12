@@ -57,43 +57,36 @@
                             </button>
                         </div>
 
-                        <div x-data="{ openEdit: false, currentTitle: '{{ image.title|escapejs }}', currentDescription: '{{ image.description|escapejs }}' }">
-                            <button @click="openEdit = true" class="flex items-center justify-center w-10 h-10 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-indigo-600 transition-all shadow-xl border border-white/30">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
+                       <div class="edit-container">
+                            <button type="button" 
+                                    onclick="event.preventDefault(); event.stopPropagation(); openMyModal('{{ image.id }}')" 
+                                    class="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-xl text-white hover:bg-indigo-600 transition-all shadow-2xl border border-white/30 group">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                             </button>
                             
-                            <template x-teleport="body">
-                                <div x-show="openEdit" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                                    <div @click.away="openEdit = false" class="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl">
-                                        <h2 class="text-2xl font-black text-gray-900 mb-6 tracking-tighter">Edit Story ✨</h2>
-                                        <div class="space-y-4">
-                                            <input type="text" x-model="currentTitle" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-indigo-500 font-bold">
-                                            <textarea x-model="currentDescription" rows="3" class="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-indigo-500 font-bold"></textarea>
-                                            <div class="flex gap-3 pt-4">
-                                                <button @click="openEdit = false" class="flex-1 px-6 py-3 bg-gray-100 rounded-xl font-bold">Cancel</button>
-                                                <button @click="
-                                                        let formData = new FormData();
-                                                        formData.append('title', currentTitle);
-                                                        formData.append('description', currentDescription);
-                                                        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-                                                        fetch(`/image/edit/{{ image.id }}/`, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                                                        .then(res => res.json()).then(data => {
-                                                            if(data.status === 'ok') {
-                                                                openEdit = false;
-                                                                document.getElementById('title-{{ image.id }}').innerText = data.new_title;
-                                                                let descElement = document.getElementById('desc-{{ image.id }}');
-                                                                if(descElement) descElement.innerText = data.new_description;
-                                                                Swal.fire({ icon: 'success', title: 'Saved!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
-                                                            }
-                                                        })" class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold">Save</button>
-                                            </div>
+                            <div id="modal-{{ image.id }}" class="hidden fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                                <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeMyModal('{{ image.id }}')"></div>
+
+                                <div class="relative bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl border border-gray-100 z-[100000]">
+                                    <h2 class="text-2xl font-black text-gray-900 mb-6">Edit Story ✨</h2>
+                                    <div class="space-y-4 text-left">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-indigo-600 uppercase ml-1">Title</label>
+                                            <input type="text" id="input-title-{{ image.id }}" value="{{ image.title }}" class="w-full px-5 py-4 bg-gray-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-500 font-bold text-gray-800">
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-indigo-600 uppercase ml-1">Description</label>
+                                            <textarea id="input-desc-{{ image.id }}" rows="4" class="w-full px-5 py-4 bg-gray-50 rounded-2xl outline-none border-2 border-transparent focus:border-indigo-500 font-bold text-gray-800">{{ image.description }}</textarea>
+                                        </div>
+                                        <div class="flex gap-4 pt-2">
+                                            <button type="button" onclick="closeMyModal('{{ image.id }}')" class="flex-1 py-4 bg-gray-100 rounded-2xl font-bold text-gray-500 hover:bg-gray-200">Cancel</button>
+                                            <button type="button" onclick="submitEdit('{{ image.id }}')" class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-lg">Save</button>
                                         </div>
                                     </div>
                                 </div>
-                            </template>
+                            </div>
                         </div>
+                        
                     {% endif %}
                 </div>
 
@@ -122,7 +115,7 @@
 
         <div class="p-5 bg-white md:hidden">
             <div class="flex items-center justify-between mb-3">
-                <span class="font-black text-gray-900 uppercase text-xs tracking-widest">{{ image.title }}</span>
+                <span id="mobile-title-{{ image.id }}" class="font-black text-gray-900 uppercase text-xs tracking-widest">{{ image.title }}</span>
                 <a href="{{ image.get_absolute_url }}?source=feed" class="text-indigo-600 font-black text-xs uppercase">View Details →</a>
             </div>
             <div class="flex items-center justify-between border-t border-gray-100 pt-3">
