@@ -13,5 +13,6 @@ urlpatterns = [
     path('edit/<int:id>/', views.edit_image, name='edit_image'),
     path('image_upload/',views.image_upload,name='image_upload'),
     path('user/<str:username>/', views.user_posts, name='user_posts'),
+    path('search/', views.image_search, name='image_search'),
 ]
 

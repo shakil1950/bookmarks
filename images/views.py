@@ -14,7 +14,7 @@ from account.utils import create_action
 import redis
 from django.db import transaction
 from django.conf import settings
-
+from django.db.models import Q
 
 @login_required
 def image_create(request):
@@ -188,28 +188,28 @@ def delete_bookmark_image(request, id):
 @login_required
 def edit_image(request, id):
     if request.method == 'POST':
-        # ১. অবজেক্ট খুঁজে বের করা
+      
         image = get_object_or_404(Image, id=id)
         
-        # ২. পারমিশন চেক (নিশ্চিত করুন ইউজার লগইন করা আছে)
+       
         if image.user != request.user and not request.user.is_superuser:
             return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
             
-        # ৩. ডাটা রিসিভ করা (strip() ব্যবহার করা ভালো)
+       
         title = request.POST.get('title', '').strip()
         description = request.POST.get('description', '').strip()
         
-        print(f'>>> Attempting Save: ID={id}, Title={title}')
+     
 
         if title:
             try:
-                # ৪. অ্যাটমিক ট্রানজ্যাকশন ব্যবহার করা সেভ নিশ্চিত করতে
+                
                 with transaction.atomic():
                     image.title = title
                     image.description = description if description else None
                     image.save()
                 
-                # ৫. কনফার্মেশনের জন্য আবার ডাটাবেস থেকে রিড করা
+              
                 image.refresh_from_db()
                 print(f'>>> Saved Successfully: {image.title}')
 
@@ -226,4 +226,18 @@ def edit_image(request, id):
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
     
+login_required  
+def image_search(request):
+    query = request.GET.get('q') # সার্চ বক্স থেকে ডাটা নেওয়া
+    results = []
     
+    if query:
+        results = Image.objects.filter(
+            Q(title__icontains=query) | 
+            Q(description__icontains=query)
+        ).distinct()
+    
+    return render(request, 'image/search_results.html', {
+        'query': query,
+        'results': results
+    })
